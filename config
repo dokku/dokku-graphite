@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+export GRAPHITE_IMAGE=${GRAPHITE_IMAGE:="jlachowski/grafana-graphite-statsd"}
+export GRAPHITE_IMAGE_VERSION=${GRAPHITE_IMAGE_VERSION:="2.1.3"}
+export GRAPHITE_ROOT=${GRAPHITE_ROOT:="/var/lib/dokku/services/grafana-graphite-statsd"}
+
+export PLUGIN_COMMAND_PREFIX="graphite"
+export PLUGIN_DATA_ROOT=$GRAPHITE_ROOT
+export PLUGIN_DATA_PORTS=(2003)
+export PLUGIN_DEFAULT_ALIAS="stats"
+export PLUGIN_ALT_ALIAS="DOKKU_GRAPHITE"
+export PLUGIN_IMAGE=$GRAPHITE_IMAGE
+export PLUGIN_IMAGE_VERSION=$GRAPHITE_IMAGE_VERSION
+export PLUGIN_SCHEME="graphite"
+export PLUGIN_SERVICE="Graphite"

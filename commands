@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+PLUGIN_BASE_PATH="$PLUGIN_PATH"
+if [[ -n $DOKKU_API_VERSION ]]; then
+  PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
+fi
+source "$PLUGIN_BASE_PATH/common/functions"
+source "$(dirname "$0")/functions"
+source "$(dirname "$0")/config"
+
+if [[ $1 == $PLUGIN_COMMAND_PREFIX:* ]]; then
+  if [[ ! -d $PLUGIN_DATA_ROOT ]]; then
+    dokku_log_fail "$PLUGIN_SERVICE: Please run: sudo dokku plugin:install"
+  fi
+fi
+
+case "$1" in
+  $PLUGIN_COMMAND_PREFIX:create)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    [[ ! -d "$PLUGIN_DATA_ROOT/$2" ]] || dokku_log_fail "$PLUGIN_SERVICE service $2 already exists"
+    SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
+
+    if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q " $PLUGIN_IMAGE_VERSION " ; then
+      dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION not found"
+    fi
+
+    mkdir -p "$SERVICE_ROOT" || dokku_log_fail "Unable to create service directory"
+    password=$(openssl rand -hex 16)
+    echo "$password" > "$SERVICE_ROOT/PASSWORD"
+    chmod 640 "$SERVICE_ROOT/PASSWORD"
+    touch "$LINKS_FILE"
+
+    dokku_log_info1 "Starting container"
+    if [[ -n $GRAPHITE_CUSTOM_ENV ]]; then
+      echo "$GRAPHITE_CUSTOM_ENV" | tr ';' "\n" > "$SERVICE_ROOT/ENV"
+    else
+      echo "" > "$SERVICE_ROOT/ENV"
+    fi
+    SERVICE_NAME=$(get_service_name "$SERVICE")
+    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/opt/graphite/storage" -e "GRAPHITE_PASSWORD=$password" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=graphite "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    echo "$ID" > "$SERVICE_ROOT/ID"
+
+    dokku_log_verbose_quiet "Waiting for container to be ready"
+    docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
+
+    dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
+    dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:destroy)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
+    SERVICE_NAME=$(get_service_name "$SERVICE")
+
+    [[ -s "$LINKS_FILE" ]] && dokku_log_fail "Cannot delete linked service"
+
+    [[ "$3" == "force" ]] && DOKKU_APPS_FORCE_DELETE=1
+    if [[ -z "$DOKKU_APPS_FORCE_DELETE" ]]; then
+      dokku_log_warn "WARNING: Potentially Destructive Action"
+      dokku_log_warn "This command will destroy $SERVICE $PLUGIN_SERVICE service."
+      dokku_log_warn "To proceed, type \"$SERVICE\""
+      echo ""
+
+      read -p "> " service_name
+      if [[ "$service_name" != "$SERVICE" ]]; then
+        dokku_log_warn "Confirmation did not match $SERVICE. Aborted."
+        exit 1
+      fi
+    fi
+
+    dokku_log_info1 "Deleting $SERVICE"
+    if [[ -n $(docker ps -aq -f name="$SERVICE_NAME") ]]; then
+      service_stop "$SERVICE"
+      sleep 1
+
+      dokku_log_verbose_quiet "Removing container"
+      docker rm -v "$SERVICE_NAME" > /dev/null
+      sleep 1
+    else
+      dokku_log_verbose_quiet "No container exists for $SERVICE"
+    fi
+
+    dokku_log_verbose_quiet "Removing data"
+    docker run --rm -v "$SERVICE_ROOT/data:/data" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chmod 777 -R /data
+    rm -rf "$SERVICE_ROOT"
+
+    dokku_log_info2 "$PLUGIN_SERVICE container deleted: $SERVICE"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:link)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_app_name "$3"
+    verify_service_name "$2"
+    service_link "$2" "$3"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:unlink)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_app_name "$3"
+    verify_service_name "$2"
+    service_unlink "$2" "$3"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:logs)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_logs "$2" "$3"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:start)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_start "$2"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:stop)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_stop "$2"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:restart)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_stop "$2"
+    service_start "$2"
+    dokku_log_info1 "Please call dokku ps:restart on all linked apps"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:info)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_info "$2"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:list)
+    service_list
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:expose)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_port_expose "$2" "${@:3}"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:unexpose)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_port_unexpose "$2"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:promote)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_service_name "$2"
+    verify_app_name "$3"
+    promote "$2" "$3"
+    ;;
+
+  help | $PLUGIN_COMMAND_PREFIX:help)
+    HELP=$(cat<<EOF
+    $PLUGIN_COMMAND_PREFIX:create <name>, Create a $PLUGIN_SERVICE service
+    $PLUGIN_COMMAND_PREFIX:destroy <name>, Delete the $PLUGIN_SERVICE service and stop its container if there are no links left
+    $PLUGIN_COMMAND_PREFIX:link <name> <app>, Link the $PLUGIN_SERVICE service to the app
+    $PLUGIN_COMMAND_PREFIX:unlink <name> <app>, Unlink the $PLUGIN_SERVICE service from the app
+    $PLUGIN_COMMAND_PREFIX:logs <name> [-t], Print the most recent log(s) for this service
+    $PLUGIN_COMMAND_PREFIX:restart <name>, Graceful shutdown and restart of the $PLUGIN_SERVICE service container
+    $PLUGIN_COMMAND_PREFIX:info <name>, Print the connection information
+    $PLUGIN_COMMAND_PREFIX:list, List all $PLUGIN_SERVICE services
+    $PLUGIN_COMMAND_PREFIX:expose <name> [port], Expose a $PLUGIN_SERVICE service on custom port if provided (random port otherwise)
+    $PLUGIN_COMMAND_PREFIX:unexpose <name>, Unexpose a previously exposed $PLUGIN_SERVICE service
+    $PLUGIN_COMMAND_PREFIX:start <name>, Start a previously stopped $PLUGIN_SERVICE service
+    $PLUGIN_COMMAND_PREFIX:stop <name>, Stop a running $PLUGIN_SERVICE service
+    $PLUGIN_COMMAND_PREFIX:promote <name> <app>, Promote service <name> as ${PLUGIN_DEFAULT_ALIAS}_URL in <app>
+EOF
+)
+    if [[ -n $DOKKU_API_VERSION ]]; then
+      echo "$HELP"
+    else
+      cat && echo "$HELP"
+    fi
+    ;;
+
+  *)
+    exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
+    ;;
+
+esac
