@@ -271,9 +271,8 @@ service_url() {
   #local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
 
   #local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
-  #local SERVICE_ALIAS="$(service_alias "$SERVICE")"
-  #echo "$PLUGIN_SCHEME://postgres:$PASSWORD@$SERVICE_ALIAS:${PLUGIN_DATASTORE_PORTS[0]}/$DATABASE_NAME"
-  echo $SERVICE
+  local SERVICE_ALIAS="$(service_alias "$SERVICE")"
+  echo "$PLUGIN_SCHEME://SERVICE_ALIAS:${PLUGIN_DATA_PORTS[0]}"
 }
 
 is_container_status () {
