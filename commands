@@ -40,12 +40,15 @@ case "$1" in
     SERVICE_NAME=$(get_service_name "$SERVICE")
     ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data/whisper:/opt/graphite/storage/whisper" -v "$SERVICE_ROOT/data/grafana:/opt/grafana/data" -e "GRAPHITE_PASSWORD=$password" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=graphite "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     echo "$ID" > "$SERVICE_ROOT/ID"
+    IP=$(get_container_ip "$ID")
 
     dokku_log_verbose_quiet "Waiting for container to be ready"
     docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
 
     dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
     dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
+    dokku_log_info1 "Service $SERVICE available under $IP:80"
+    dokku_log_info1 "Initial login/pass: admin/admin. Please change it on first login"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:destroy)
