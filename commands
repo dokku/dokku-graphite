@@ -38,7 +38,7 @@ case "$1" in
       echo "" > "$SERVICE_ROOT/ENV"
     fi
     SERVICE_NAME=$(get_service_name "$SERVICE")
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/opt/graphite/storage" -e "GRAPHITE_PASSWORD=$password" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=graphite "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data/whisper:/opt/graphite/storage/whisper" -v "$SERVICE_ROOT/data/grafana:/opt/grafana/data" -e "GRAPHITE_PASSWORD=$password" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=graphite "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     echo "$ID" > "$SERVICE_ROOT/ID"
 
     dokku_log_verbose_quiet "Waiting for container to be ready"
