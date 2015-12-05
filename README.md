@@ -101,3 +101,7 @@ dokku graphite:unlink lolipop playground
 dokku graphite:logs lolipop
 dokku graphite:logs lolipop -t # to tail
 ```
+
+## TODO:
+- fix frontend port forwarding, so it's persistent on docker service resets, or ...
+- provide nginx vhost config for each graphite service (grafena frontend) 
