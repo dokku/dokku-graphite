@@ -10,7 +10,7 @@ Grafana/graphite/statsd plugin for dokku. Currently defaults to installing [graf
 ## installation
 
 ```shell
-dokku plugin:install https://github.com/jlachowski/dokku-graphite-grafana.git graphite
+dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git graphite
 ```
 
 ## commands
