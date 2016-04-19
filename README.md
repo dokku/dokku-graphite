@@ -1,4 +1,4 @@
-# dokku graphite (beta) 
+# dokku graphite (beta)
 
 Grafana/graphite/statsd plugin for dokku. Currently defaults to installing [grafana-graphite-statsd 2.5.0](https://hub.docker.com/r/jlachowski/grafana-graphite-statsd) ([source](https://github.com/jlachowski/docker-grafana-graphite)).
 
@@ -102,6 +102,34 @@ dokku graphite:logs lolipop
 dokku graphite:logs lolipop -t # to tail
 ```
 
+## Changing database adapter
+
+It's possible to change the protocol for STATSD_URL by setting
+the environment variable STATSD_DATABASE_SCHEME on the app:
+
+```
+dokku config:set playground STATSD_DATABASE_SCHEME=statsd2
+dokku graphite:link lolipop playground
+```
+
+Will cause STATSD_URL to be set as
+statsd2://dokku-graphite-lolipop:8125
+
+CAUTION: Changing STATSD_DATABASE_SCHEME after linking will cause dokku to
+believe the graphite is not linked when attempting to use `dokku graphite:unlink`
+or `dokku graphite:promote`.
+You should be able to fix this by
+
+- Changing STATSD_URL manually to the new value.
+
+OR
+
+- Set STATSD_DATABASE_SCHEME back to its original setting
+- Unlink the service
+- Change STATSD_DATABASE_SCHEME to the desired setting
+- Relink the service
+
 ## TODO:
 - fix frontend port forwarding, so it's persistent on docker service resets, or ...
-- provide nginx vhost config for each graphite service (grafena frontend) 
+- provide nginx vhost config for each graphite service (grafena frontend)
+- tests
