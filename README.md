@@ -4,12 +4,13 @@ Grafana/graphite/statsd plugin for dokku. Currently defaults to installing [graf
 
 ## requirements
 
-- dokku 0.4.0+
+- dokku 0.4.x+
 - docker 1.8.x
 
 ## installation
 
 ```shell
+# on 0.4.x+
 dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git graphite
 ```
 
