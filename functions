@@ -381,6 +381,6 @@ service_linked_apps() {
 
 update_plugin_scheme_for_app() {
   local APP=$1
-  local STATSD_DATABASE_SCHEME=$(config_get $APP STATSD_DATABASE_SCHEME)
+  local STATSD_DATABASE_SCHEME=$(config_get "$APP" STATSD_DATABASE_SCHEME)
   PLUGIN_SCHEME=${STATSD_DATABASE_SCHEME:-$PLUGIN_SCHEME}
 }
