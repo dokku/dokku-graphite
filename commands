@@ -14,10 +14,6 @@ if [[ ! -d $PLUGIN_DATA_ROOT ]]; then
   dokku_log_fail "$PLUGIN_SERVICE: Please run: sudo dokku plugin:install"
 fi
 
-if [[ -d "$PLUGIN_DATA_ROOT/*" ]]; then
-  rm -rf "${PLUGIN_DATA_ROOT:?}/*"
-fi
-
 case "$1" in
   $PLUGIN_COMMAND_PREFIX:create)
     [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"

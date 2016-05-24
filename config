@@ -12,3 +12,7 @@ export PLUGIN_IMAGE=$GRAPHITE_IMAGE
 export PLUGIN_IMAGE_VERSION=$GRAPHITE_IMAGE_VERSION
 export PLUGIN_SCHEME="statsd"
 export PLUGIN_SERVICE="Graphite"
+
+if [[ -d "$PLUGIN_DATA_ROOT/*" ]]; then
+  rm -rf "${PLUGIN_DATA_ROOT:?}/*"
+fi
