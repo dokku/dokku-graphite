@@ -2,6 +2,9 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_AVAILABLE_PATH/config/functions"
+if [[ -f "$PLUGIN_AVAILABLE_PATH/docker-options/functions" ]]; then
+  source "$PLUGIN_AVAILABLE_PATH/docker-options/functions"
+fi
 
 get_random_ports() {
   local iterations="${1:-1}"
@@ -91,7 +94,14 @@ service_link() {
   if [[ -n $DEFAULT_ALIAS ]]; then
     ALIAS=$(service_alternative_alias "$EXISTING_CONFIG")
   fi
-  dokku docker-options:add "$APP" build,deploy,run "--link $SERVICE_NAME:$SERVICE_ALIAS"
+
+  if declare -f -F add_passed_docker_option > /dev/null; then
+    # shellcheck disable=SC2034
+    local passed_phases=(build deploy run)
+    add_passed_docker_option passed_phases[@] "--link $SERVICE_NAME:$SERVICE_ALIAS"
+  else
+    dokku docker-options:add "$APP" build,deploy,run "--link $SERVICE_NAME:$SERVICE_ALIAS"
+  fi
   config_set "$APP" "${ALIAS}_URL=$SERVICE_URL"
 }
 
@@ -261,7 +271,7 @@ service_create_container() {
   docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
-  dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
+  service_info "$SERVICE"
   dokku_log_info1 "Service $SERVICE available under $IP:80"
   dokku_log_info1 "Initial login/pass: admin/admin. Please change it on first login"
 }
@@ -296,7 +306,13 @@ service_unlink() {
   [[ -z ${LINK[*]} ]] && dokku_log_fail "Not linked to app $APP"
   remove_from_links_file "$SERVICE" "$APP"
 
-  dokku docker-options:remove "$APP" build,deploy,run "--link $SERVICE_NAME:$SERVICE_ALIAS"
+  if declare -f -F add_passed_docker_option > /dev/null; then
+    # shellcheck disable=SC2034
+    local passed_phases=(build deploy run)
+    remove_passed_docker_option passed_phases[@] "--link $SERVICE_NAME:$SERVICE_ALIAS"
+  else
+    dokku docker-options:remove "$APP" build,deploy,run "--link $SERVICE_NAME:$SERVICE_ALIAS"
+  fi
   config_unset "$APP" "${LINK[*]}"
 }
 
