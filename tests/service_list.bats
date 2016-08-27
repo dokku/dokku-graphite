@@ -15,7 +15,7 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with exposed ports" {
-  dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242 4243
+  dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
   assert_contains "${lines[*]}" "l     statsd:1.7.5  running  8125->4242              -"
 }
