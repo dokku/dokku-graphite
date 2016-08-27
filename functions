@@ -373,6 +373,20 @@ service_create_container() {
   dokku_log_info1 "Initial login/pass: admin/admin. Please change it on first login"
 }
 
+service_export() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+
+  dokku_log_fail "Not yet implemented"
+}
+
+service_import() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+
+  dokku_log_fail "Not yet implemented"
+}
+
 service_start() {
   local SERVICE="$1"
   local QUIET="$2"

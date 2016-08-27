@@ -1,0 +1,4 @@
+tests/dokku
+tests/fixtures
+tests/bin/plugn
+.vagrant
