@@ -55,7 +55,7 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:link) links to app with docker-options" {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku docker-options my_app
-  assert_contains "${lines[*]}" "--link dokku.statsd.l:dokku-statsd-l"
+  assert_contains "${lines[*]}" "--link dokku.graphite.l:dokku-graphite-l"
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 

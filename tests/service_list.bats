@@ -11,20 +11,20 @@ teardown() {
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with no exposed ports, no linked apps" {
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "l     statsd:1.7.5  running  -              -"
+  assert_contains "${lines[*]}" "l     jlachowski/grafana-graphite-statsd:2.5.0  running  -              -"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with exposed ports" {
   dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "l     statsd:1.7.5  running  8125->4242              -"
+  assert_contains "${lines[*]}" "l     jlachowski/grafana-graphite-statsd:2.5.0  running  8125->4242              -"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with linked app" {
   dokku apps:create my_app
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "l     statsd:1.7.5  running  -              my_app"
+  assert_contains "${lines[*]}" "l     jlachowski/grafana-graphite-statsd:2.5.0  running  -              my_app"
   dokku --force apps:destroy my_app
 }
 
