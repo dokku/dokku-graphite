@@ -40,7 +40,7 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:link) exports STATSD_URL to app" {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   url=$(dokku config:get my_app STATSD_URL)
-  assert_contains "$url" "http://dokku-statsd-l:8125"
+  assert_contains "$url" "statsd://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
@@ -63,6 +63,6 @@ teardown() {
   dokku config:set my_app STATSD_DATABASE_SCHEME=statsd2
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   url=$(dokku config:get my_app STATSD_URL)
-  assert_contains "$url" "statsd2://dokku-statsd-l:8125"
+  assert_contains "$url" "statsd2://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }

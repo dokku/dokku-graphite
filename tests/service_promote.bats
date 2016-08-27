@@ -39,21 +39,21 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:promote) changes STATSD_URL" {
-  dokku config:set my_app "STATSD_URL=http://host:8125" "DOKKU_STATSD_BLUE_URL=http://dokku-statsd-l:8125"
+  dokku config:set my_app "STATSD_URL=statsd://host:8125" "DOKKU_STATSD_BLUE_URL=statsd://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:promote" l my_app
   url=$(dokku config:get my_app STATSD_URL)
-  assert_equal "$url" "http://dokku-statsd-l:8125"
+  assert_equal "$url" "statsd://dokku-graphite-l:8125"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:promote) creates new config url when needed" {
-  dokku config:set my_app "STATSD_URL=http://host:8125" "DOKKU_STATSD_BLUE_URL=http://dokku-statsd-l:8125"
+  dokku config:set my_app "STATSD_URL=statsd://host:8125" "DOKKU_STATSD_BLUE_URL=statsd://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:promote" l my_app
   run dokku config my_app
   assert_contains "${lines[*]}" "DOKKU_STATSD_"
 }
 @test "($PLUGIN_COMMAND_PREFIX:promote) uses STATSD_DATABASE_SCHEME variable" {
-  dokku config:set my_app "STATSD_DATABASE_SCHEME=statsd2" "STATSD_URL=http://host:8125" "DOKKU_STATSD_BLUE_URL=statsd2://dokku-statsd-l:8125"
+  dokku config:set my_app "STATSD_DATABASE_SCHEME=statsd2" "STATSD_URL=statsd://host:8125" "DOKKU_STATSD_BLUE_URL=statsd2://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:promote" l my_app
   url=$(dokku config:get my_app STATSD_URL)
-  assert_contains "$url" "statsd2://dokku-statsd-l:8125"
+  assert_contains "$url" "statsd2://dokku-graphite-l:8125"
 }
