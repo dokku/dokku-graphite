@@ -1,6 +1,6 @@
-# dokku graphite (beta)
+# dokku graphite (beta) [![Build Status](https://img.shields.io/travis/dokku/dokku-graphite-grafana.svg?branch=master "Build Status")](https://travis-ci.org/dokku/dokku-graphite-grafana) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
 
-Grafana/graphite/statsd plugin for dokku. Currently defaults to installing [grafana-graphite-statsd 2.5.0](https://hub.docker.com/r/jlachowski/grafana-graphite-statsd) ([source](https://github.com/jlachowski/docker-grafana-graphite)).
+Official grafana/graphite/statsd plugin for dokku. Currently defaults to installing [grafana-graphite-statsd 2.5.0](https://hub.docker.com/r/jlachowski/grafana-graphite-statsd) ([source](https://github.com/jlachowski/docker-grafana-graphite)).
 
 ## requirements
 
@@ -11,7 +11,7 @@ Grafana/graphite/statsd plugin for dokku. Currently defaults to installing [graf
 
 ```shell
 # on 0.4.x+
-dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git graphite
+sudo dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git graphite
 ```
 
 ## commands
