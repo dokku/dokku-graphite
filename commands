@@ -16,9 +16,10 @@ fi
 
 case "$1" in
   $PLUGIN_COMMAND_PREFIX:create)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    [[ ! -d "$PLUGIN_DATA_ROOT/$2" ]] || dokku_log_fail "$PLUGIN_SERVICE service $2 already exists"
-    SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    [[ ! -d "$PLUGIN_DATA_ROOT/$SERVICE" ]] || dokku_log_fail "$PLUGIN_SERVICE service $SERVICE already exists"
+    SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
 
     if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q " $PLUGIN_IMAGE_VERSION " ; then
       docker pull "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" || dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION pull failed"
@@ -39,14 +40,15 @@ case "$1" in
     ;;
 
   $PLUGIN_COMMAND_PREFIX:destroy)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
 
     [[ -s "$LINKS_FILE" ]] && dokku_log_fail "Cannot delete linked service"
 
-    [[ "$3" == "force" ]] && DOKKU_APPS_FORCE_DELETE=1
+    [[ "$FORCE_DESTROY" == "force" ]] && DOKKU_APPS_FORCE_DELETE=1
     if [[ -z "$DOKKU_APPS_FORCE_DELETE" ]]; then
       dokku_log_warn "WARNING: Potentially Destructive Action"
       dokku_log_warn "This command will destroy $SERVICE $PLUGIN_SERVICE service."
@@ -80,51 +82,58 @@ case "$1" in
     ;;
 
   $PLUGIN_COMMAND_PREFIX:link)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
     [[ -z $3 ]] && dokku_log_fail "Please specify an app to run the command on"
     verify_app_name "$3"
-    verify_service_name "$2"
-    service_link "$2" "$3"
+    verify_service_name "$SERVICE"
+    service_link "$SERVICE" "$3"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:unlink)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
     [[ -z $3 ]] && dokku_log_fail "Please specify an app to run the command on"
     verify_app_name "$3"
-    verify_service_name "$2"
-    service_unlink "$2" "$3"
+    verify_service_name "$SERVICE"
+    service_unlink "$SERVICE" "$3"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:logs)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_logs "$2" "$3"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_logs "$SERVICE" "$3"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:start)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_start "$2"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_start "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:stop)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_stop "$2"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_stop "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:restart)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_stop "$2"
-    service_start "$2"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_stop "$SERVICE"
+    service_start "$SERVICE"
     dokku_log_info1 "Please call dokku ps:restart on all linked apps"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:info)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_info "$2"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_info "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:list)
@@ -132,23 +141,26 @@ case "$1" in
     ;;
 
   $PLUGIN_COMMAND_PREFIX:expose)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_port_expose "$2" "${@:3}"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_port_expose "$SERVICE" "${@:3}"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:unexpose)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    verify_service_name "$2"
-    service_port_unexpose "$2"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$SERVICE"
+    service_port_unexpose "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:promote)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    SERVICE="$2";
+    [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
     [[ -z $3 ]] && dokku_log_fail "Please specify an app to run the command on"
-    verify_service_name "$2"
+    verify_service_name "$SERVICE"
     verify_app_name "$3"
-    promote "$2" "$3"
+    promote "$SERVICE" "$3"
     ;;
 
   help | $PLUGIN_COMMAND_PREFIX:help)
