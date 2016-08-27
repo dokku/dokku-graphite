@@ -17,9 +17,13 @@ sudo dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git gr
 ## commands
 
 ```
+graphite:clone <name> <new-name>  NOT IMPLEMENTED
+graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
 graphite:destroy <name>           Delete the service and stop its container if there are no links left
+graphite:export <name> > <file>   NOT IMPLEMENTED
 graphite:expose <name> [port]     (WIP) Expose a graphite service on custom port if provided (random port otherwise)
+graphite:import <name> <file>     NOT IMPLEMENTED
 graphite:info <name>              Print the connection information
 graphite:link <name> <app>        Link the graphite service to the app
 graphite:list                     List all graphite services
@@ -45,6 +49,11 @@ dokku graphite:create lolipop
 export GRAPHITE_IMAGE="jlachowski/grafana-graphite-statsd"
 export GRAPHITE_IMAGE_VERSION="2.5.0"
 
+# you can also specify custom environment
+# variables to start the elasticsearch service
+# in semi-colon separated forma
+export GRAPHITE_CUSTOM_ENV="USER=alpha;HOST=beta"
+
 # create a graphite service
 dokku graphite:create lolipop
 
@@ -61,6 +70,7 @@ dokku graphite:link lolipop playground
 # the following environment variables will be set automatically by docker (not
 # on the app itself, so they won’t be listed when calling dokku config)
 #
+#   DOKKU_GRAPHITE_LOLIPOP_NAME=/random_name/GRAPHITE
 #   DOKKU_GRAPHITE_LOLIPOP_PORT=tcp://172.17.0.1:8125
 #   DOKKU_GRAPHITE_LOLIPOP_PORT_8125_UDP=udp://172.17.0.1:8125
 #   DOKKU_GRAPHITE_LOLIPOP_PORT_8125_UDP_PROTO=tcp
@@ -101,6 +111,9 @@ dokku graphite:unlink lolipop playground
 # you can tail logs for a particular service
 dokku graphite:logs lolipop
 dokku graphite:logs lolipop -t # to tail
+
+# finally, you can destroy the container
+dokku elasticsearch:destroy lolipop
 ```
 
 ## Changing database adapter
