@@ -17,7 +17,7 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:list) with exposed ports" {
   dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "l     jlachowski/grafana-graphite-statsd:2.5.0  running  8125->4242              -"
+  assert_contains "${lines[*]}" "l     jlachowski/grafana-graphite-statsd:2.5.0  running  8125->4242     -"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with linked app" {
@@ -31,6 +31,6 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:list) when there are no services" {
   dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l >&2
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "There are no Elasticsearch services"
+  assert_contains "${lines[*]}" "There are no Graphite services"
   dokku "$PLUGIN_COMMAND_PREFIX:create" l >&2
 }
