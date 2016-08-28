@@ -64,6 +64,7 @@ dokku graphite:info lolipop --config-dir
 dokku graphite:info lolipop --data-dir
 dokku graphite:info lolipop --dsn
 dokku graphite:info lolipop --exposed-ports
+dokku graphite:info lolipop --id
 dokku graphite:info lolipop --links
 dokku graphite:info lolipop --status
 dokku graphite:info lolipop --version
