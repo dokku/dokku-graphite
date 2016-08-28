@@ -48,17 +48,25 @@ dokku graphite:create lolipop
 # jlachowski/grafana-graphite-statsd image
 export GRAPHITE_IMAGE="jlachowski/grafana-graphite-statsd"
 export GRAPHITE_IMAGE_VERSION="2.5.0"
+dokku graphite:create lolipop
 
 # you can also specify custom environment
 # variables to start the elasticsearch service
 # in semi-colon separated forma
 export GRAPHITE_CUSTOM_ENV="USER=alpha;HOST=beta"
-
-# create a graphite service
 dokku graphite:create lolipop
 
 # get connection information as follows
 dokku graphite:info lolipop
+
+# you can also retrieve a specific piece of service info via flags
+dokku graphite:info lolipop --config-dir
+dokku graphite:info lolipop --data-dir
+dokku graphite:info lolipop --dsn
+dokku graphite:info lolipop --exposed-ports
+dokku graphite:info lolipop --links
+dokku graphite:info lolipop --status
+dokku graphite:info lolipop --version
 
 # a graphite service can be linked to a
 # container this will use native docker
