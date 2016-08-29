@@ -21,7 +21,7 @@ graphite:clone <name> <new-name>  NOT IMPLEMENTED
 graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
 graphite:destroy <name>           Delete the service and stop its container if there are no links left
-graphite:enter <name> [command]   Enter a running couchdb service or run a command
+graphite:enter <name> [command]   Enter or run a command in a running graphite service container
 graphite:export <name> > <file>   NOT IMPLEMENTED
 graphite:expose <name> [port]     Expose a graphite service on custom port if provided (random port otherwise)
 graphite:import <name> <file>     NOT IMPLEMENTED
