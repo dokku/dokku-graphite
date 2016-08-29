@@ -25,6 +25,6 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:expose) success when providing custom ports" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242
-  assert_contains "${lines[*]}" "exposed on port(s) [container->host]: 8125->4242"
+  run dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242 4243 4244 4245
+  assert_contains "${lines[*]}" "exposed on port(s) [container->host]: 8125->4242 8126->4243 80->4244 2003->4245"
 }

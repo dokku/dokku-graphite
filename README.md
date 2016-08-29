@@ -22,7 +22,7 @@ graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
 graphite:destroy <name>           Delete the service and stop its container if there are no links left
 graphite:export <name> > <file>   NOT IMPLEMENTED
-graphite:expose <name> [port]     (WIP) Expose a graphite service on custom port if provided (random port otherwise)
+graphite:expose <name> [port]     Expose a graphite service on custom port if provided (random port otherwise)
 graphite:import <name> <file>     NOT IMPLEMENTED
 graphite:info <name>              Print the connection information
 graphite:link <name> <app>        Link the graphite service to the app
@@ -32,7 +32,7 @@ graphite:promote <name> <app>     Promote service <name> as STATSD_URL in <app>
 graphite:restart <name>           Graceful shutdown and restart of the graphite service container
 graphite:start <name>             Start a previously stopped graphite service
 graphite:stop <name>              Stop a running graphite service
-graphite:unexpose <name>          (WIP) Unexpose a previously exposed graphite service
+graphite:unexpose <name>          Unexpose a previously exposed graphite service
 graphite:unlink <name> <app>      Unlink the graphite service from the app
 ```
 
