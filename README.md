@@ -21,6 +21,7 @@ graphite:clone <name> <new-name>  NOT IMPLEMENTED
 graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
 graphite:destroy <name>           Delete the service and stop its container if there are no links left
+graphite:enter <name> [command]   Enter a running couchdb service or run a command
 graphite:export <name> > <file>   NOT IMPLEMENTED
 graphite:expose <name> [port]     Expose a graphite service on custom port if provided (random port otherwise)
 graphite:import <name> <file>     NOT IMPLEMENTED
@@ -70,6 +71,14 @@ dokku graphite:info lolipop --links
 dokku graphite:info lolipop --service-root
 dokku graphite:info lolipop --status
 dokku graphite:info lolipop --version
+
+# a bash prompt can be opened against a running service
+# filesystem changes will not be saved to disk
+dokku graphite:enter lolipop
+
+# you may also run a command directly against the service
+# filesystem changes will not be saved to disk
+dokku graphite:enter lolipop ls -lah /
 
 # a graphite service can be linked to a
 # container this will use native docker
