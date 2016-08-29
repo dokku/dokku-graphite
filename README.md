@@ -67,6 +67,7 @@ dokku graphite:info lolipop --exposed-ports
 dokku graphite:info lolipop --id
 dokku graphite:info lolipop --internal-ip
 dokku graphite:info lolipop --links
+dokku graphite:info lolipop --service-root
 dokku graphite:info lolipop --status
 dokku graphite:info lolipop --version
 
