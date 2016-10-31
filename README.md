@@ -17,6 +17,11 @@ sudo dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git gr
 ## commands
 
 ```
+graphite:backup <name> <bucket>   NOT IMPLEMENTED
+graphite:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> NOT IMPLEMENTED
+graphite:backup-deauth <name>     NOT IMPLEMENTED
+graphite:backup-schedule <name> <schedule> <bucket> NOT IMPLEMENTED
+graphite:backup-unschedule <name> NOT IMPLEMENTED
 graphite:clone <name> <new-name>  NOT IMPLEMENTED
 graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
