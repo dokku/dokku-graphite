@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_BASE_PATH/common/functions"
+source "$PLUGIN_BASE_PATH/nginx-vhosts/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+graphite-nginx-unexpose-cmd() {
+  declare desc="expose the $PLUGIN_SERVICE service's grafana via an nginx vhost"
+  local cmd="$PLUGIN_COMMAND_PREFIX:nginx-unexpose" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare SERVICE="$1"
+
+  [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+  verify_service_name "$SERVICE"
+
+  local NGINX_CONF="/etc/nginx/conf.d/grafana-${SERVICE}.conf"
+  if [[ -f "$NGINX_CONF" ]]; then
+    sudo /bin/rm "$NGINX_CONF"
+    restart_nginx
+  fi
+  dokku_log_info1 "Service grafana is now unexposed"
+}
+
+graphite-nginx-unexpose-cmd "$@"

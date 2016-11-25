@@ -1,6 +1,6 @@
 # dokku graphite (beta) [![Build Status](https://img.shields.io/travis/dokku/dokku-graphite-grafana.svg?branch=master "Build Status")](https://travis-ci.org/dokku/dokku-graphite-grafana) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
 
-Official grafana/graphite/statsd plugin for dokku. Currently defaults to installing [docker-grafana-graphite 3.0.0](https://hub.docker.com/r/dokkupaas/docker-grafana-graphite) ([source](https://github.com/dokku/docker-grafana-graphite)).
+Official grafana/graphite/statsd plugin for dokku. Currently defaults to installing [docker-grafana-graphite 3.0.1](https://hub.docker.com/r/dokkupaas/docker-grafana-graphite) ([source](https://github.com/dokku/docker-grafana-graphite)).
 
 ## requirements
 
@@ -34,6 +34,8 @@ graphite:info <name>              Print the connection information
 graphite:link <name> <app>        Link the graphite service to the app
 graphite:list                     List all graphite services
 graphite:logs <name> [-t]         Print the most recent log(s) for this service
+graphite:nginx-expose <name> <domain> Expose the graphite service's grafana via an nginx vhost
+graphite:nginx-unexpose <name>    Unexpose the graphite service's grafana
 graphite:promote <name> <app>     Promote service <name> as STATSD_URL in <app>
 graphite:restart <name>           Graceful shutdown and restart of the graphite service container
 graphite:start <name>             Start a previously stopped graphite service
@@ -53,7 +55,7 @@ dokku graphite:create lolipop
 # it *must* be compatible with the
 # dokkupaas/docker-grafana-graphite image
 export GRAPHITE_IMAGE="dokkupaas/docker-grafana-graphite"
-export GRAPHITE_IMAGE_VERSION="2.5.0"
+export GRAPHITE_IMAGE_VERSION="3.0.1"
 dokku graphite:create lolipop
 
 # you can also specify custom environment
