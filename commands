@@ -75,6 +75,14 @@ case "$1" in
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/logs" "$@"
     ;;
 
+  $PLUGIN_COMMAND_PREFIX:nginx-expose)
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/nginx-expose" "$@"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:nginx-unexpose)
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/nginx-unexpose" "$@"
+    ;;
+
   $PLUGIN_COMMAND_PREFIX:promote)
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/promote" "$@"
     ;;
@@ -120,6 +128,8 @@ case "$1" in
     $PLUGIN_COMMAND_PREFIX:link <name> <app>, Link the $PLUGIN_SERVICE service to the app
     $PLUGIN_COMMAND_PREFIX:list, List all $PLUGIN_SERVICE services
     $PLUGIN_COMMAND_PREFIX:logs <name> [-t], Print the most recent log(s) for this service
+    $PLUGIN_COMMAND_PREFIX:nginx-expose <name> <domain>, expose the $PLUGIN_SERVICE service's grafana via an nginx vhost
+    $PLUGIN_COMMAND_PREFIX:nginx-unexpose <name>, unexpose the $PLUGIN_SERVICE service's grafana
     $PLUGIN_COMMAND_PREFIX:promote <name> <app>, Promote service <name> as ${PLUGIN_DEFAULT_ALIAS}_URL in <app>
     $PLUGIN_COMMAND_PREFIX:restart <name>, Graceful shutdown and restart of the $PLUGIN_SERVICE service container
     $PLUGIN_COMMAND_PREFIX:start <name>, Start a previously stopped $PLUGIN_SERVICE service

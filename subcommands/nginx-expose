@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_BASE_PATH/common/functions"
+source "$PLUGIN_BASE_PATH/domains/functions"
+source "$PLUGIN_BASE_PATH/nginx-vhosts/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+graphite-nginx-expose-cmd() {
+  declare desc="expose the $PLUGIN_SERVICE service's grafana via an nginx vhost"
+  local cmd="$PLUGIN_COMMAND_PREFIX:nginx-expose" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare SERVICE="$1" DOMAIN="$2"
+
+  [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+  verify_service_name "$SERVICE"
+
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  local SERVICE_CONTAINER_ID="$(cat "$SERVICE_ROOT/ID")"
+  local SERVICE_UPSTREAM="$(get_container_ip "${SERVICE_CONTAINER_ID}"):80"
+
+  local NGINX_CONF="/etc/nginx/conf.d/grafana-${SERVICE}.conf"
+  local NGINX_TEMPLATE="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/templates/nginx.conf.sigil"
+  local GLOBAL_VHOST_PATH="$DOKKU_ROOT/VHOST"
+  local DEFAULT_VHOSTS="$(cat "$GLOBAL_VHOST_PATH")"
+
+  local SIGIL_PARAMS=(-f "$NGINX_TEMPLATE"
+        DEFAULT_VHOSTS="$DEFAULT_VHOSTS"
+        DOMAIN="$DOMAIN"
+        SERVICE="$SERVICE"
+        SERVICE_UPSTREAM="$SERVICE_UPSTREAM")
+
+  sigil "${SIGIL_PARAMS[@]}" | cat -s | sudo /usr/bin/tee "$NGINX_CONF" > /dev/null
+  restart_nginx
+  dokku_log_info1 "Grafana for $SERVICE is now available under the following url(s):"
+  if [[ -z "$DOMAIN" ]]; then
+    for DEFAULT_VHOST in $DEFAULT_VHOSTS; do
+      dokku_log_verbose "grafana-${SERVICE}.${DEFAULT_VHOST}"
+    done
+  else
+    dokku_log_verbose "$DOMAIN"
+  fi
+}
+
+graphite-nginx-expose-cmd "$@"
