@@ -59,8 +59,8 @@ export GRAPHITE_IMAGE_VERSION="3.0.1"
 dokku graphite:create lolipop
 
 # you can also specify custom environment
-# variables to start the elasticsearch service
-# in semi-colon separated forma
+# variables to start the graphite service
+# in semi-colon separated form
 export GRAPHITE_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku graphite:create lolipop
 
@@ -140,7 +140,7 @@ dokku graphite:logs lolipop
 dokku graphite:logs lolipop -t # to tail
 
 # finally, you can destroy the container
-dokku elasticsearch:destroy lolipop
+dokku graphite:destroy lolipop
 ```
 
 ## Changing database adapter
