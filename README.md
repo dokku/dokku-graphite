@@ -18,7 +18,7 @@ sudo dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git gr
 
 ```
 graphite:backup <name> <bucket>   NOT IMPLEMENTED
-graphite:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> NOT IMPLEMENTED
+graphite:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>) NOT IMPLEMENTED
 graphite:backup-deauth <name>     NOT IMPLEMENTED
 graphite:backup-schedule <name> <schedule> <bucket> NOT IMPLEMENTED
 graphite:backup-unschedule <name> NOT IMPLEMENTED
@@ -59,7 +59,7 @@ export GRAPHITE_IMAGE_VERSION="3.0.1"
 dokku graphite:create lolipop
 
 # you can also specify custom environment
-# variables to start the elasticsearch service
+# variables to start the graphite service
 # in semi-colon separated forma
 export GRAPHITE_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku graphite:create lolipop
@@ -140,7 +140,7 @@ dokku graphite:logs lolipop
 dokku graphite:logs lolipop -t # to tail
 
 # finally, you can destroy the container
-dokku elasticsearch:destroy lolipop
+dokku graphite:destroy lolipop
 ```
 
 ## Changing database adapter
@@ -169,8 +169,3 @@ OR
 - Unlink the service
 - Change STATSD_DATABASE_SCHEME to the desired setting
 - Relink the service
-
-## TODO:
-- fix frontend port forwarding, so it's persistent on docker service resets, or ...
-- provide nginx vhost config for each graphite service (grafena frontend)
-- tests
