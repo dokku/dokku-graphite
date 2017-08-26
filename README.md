@@ -60,7 +60,7 @@ dokku graphite:create lolipop
 
 # you can also specify custom environment
 # variables to start the graphite service
-# in semi-colon separated forma
+# in semi-colon separated form
 export GRAPHITE_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku graphite:create lolipop
 
