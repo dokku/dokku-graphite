@@ -30,6 +30,8 @@ plugin-install() {
 %dokku ALL=(ALL) NOPASSWD:/bin/mv ${PLUGIN_DATA_ROOT}/.TMP_CRON_FILE /etc/cron.d/dokku-${PLUGIN_COMMAND_PREFIX}-*
 %dokku ALL=(ALL) NOPASSWD:/bin/chown 8983 $PLUGIN_DATA_ROOT/*
 %dokku ALL=(ALL) NOPASSWD:/bin/chgrp 8983 $PLUGIN_DATA_ROOT/*
+%dokku ALL=(ALL) NOPASSWD:/usr/bin/tee /etc/nginx/conf.d/grafana-*.conf
+%dokku ALL=(ALL) NOPASSWD:/bin/rm /etc/nginx/conf.d/grafana-*.conf
 EOL
 
   chmod 0440 "$_SUDOERS_FILE"
