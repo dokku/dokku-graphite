@@ -21,7 +21,9 @@ graphite:backup <name> <bucket> (--use-iam) NOT IMPLEMENTED
 graphite:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>) NOT IMPLEMENTED
 graphite:backup-deauth <name>     NOT IMPLEMENTED
 graphite:backup-schedule <name> <schedule> <bucket> NOT IMPLEMENTED
+graphite:backup-set-encryption <name> <encryption_key>, NOT IMPLEMENTED
 graphite:backup-unschedule <name> NOT IMPLEMENTED
+graphite:backup-unset-encryption <name>, NOT IMPLEMENTED
 graphite:clone <name> <new-name>  NOT IMPLEMENTED
 graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
