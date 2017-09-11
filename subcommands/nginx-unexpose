@@ -5,7 +5,10 @@ source "$PLUGIN_BASE_PATH/common/functions"
 source "$PLUGIN_BASE_PATH/nginx-vhosts/functions"
 source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
-graphite-nginx-unexpose-cmd() {
+service-nginx-unexpose-cmd() {
+  #E unexpose the service's grafana
+  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-unexpose lolipop
+  #A service, service to run command against
   declare desc="expose the $PLUGIN_SERVICE service's grafana via an nginx vhost"
   local cmd="$PLUGIN_COMMAND_PREFIX:nginx-unexpose" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare SERVICE="$1"
@@ -21,4 +24,4 @@ graphite-nginx-unexpose-cmd() {
   dokku_log_info1 "Service grafana is now unexposed"
 }
 
-graphite-nginx-unexpose-cmd "$@"
+service-nginx-unexpose-cmd "$@"
