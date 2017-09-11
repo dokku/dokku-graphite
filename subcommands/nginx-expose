@@ -6,7 +6,13 @@ source "$PLUGIN_BASE_PATH/domains/functions"
 source "$PLUGIN_BASE_PATH/nginx-vhosts/functions"
 source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
-graphite-nginx-expose-cmd() {
+service-nginx-expose-cmd() {
+  #E unexpose the service's grafana via nginx on all global vhosts
+  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-expose lolipop
+  #E unexpose the service's grafana via nginx on a specific domain
+  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-expose lolipop example.com
+  #A service, service to run command against
+  #A domain, (optional) a domain to expose nginx on
   declare desc="expose the $PLUGIN_SERVICE service's grafana via an nginx vhost"
   local cmd="$PLUGIN_COMMAND_PREFIX:nginx-expose" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare SERVICE="$1" DOMAIN="$2"
@@ -41,4 +47,4 @@ graphite-nginx-expose-cmd() {
   fi
 }
 
-graphite-nginx-expose-cmd "$@"
+service-nginx-expose-cmd "$@"
