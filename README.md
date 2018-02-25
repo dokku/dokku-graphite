@@ -29,11 +29,13 @@ graphite:connect <name>           NOT IMPLEMENTED
 graphite:create <name>            Create a graphite service with environment variables
 graphite:destroy <name>           Delete the service, delete the data and stop its container if there are no links left
 graphite:enter <name> [command]   Enter or run a command in a running graphite service container
+graphite:exists <service>         Check if the graphite service exists
 graphite:export <name> > <file>   NOT IMPLEMENTED
 graphite:expose <name> [port]     Expose a graphite service on custom port if provided (random port otherwise)
 graphite:import <name> <file>     NOT IMPLEMENTED
 graphite:info <name>              Print the connection information
 graphite:link <name> <app>        Link the graphite service to the app
+graphite:linked <name> <app>      Check if the graphite service is linked to an app
 graphite:list                     List all graphite services
 graphite:logs <name> [-t]         Print the most recent log(s) for this service
 graphite:nginx-expose <name> <domain> Expose the graphite service's grafana via an nginx vhost
