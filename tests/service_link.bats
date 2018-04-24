@@ -66,3 +66,10 @@ teardown() {
   assert_contains "$url" "statsd2://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
+
+@test "($PLUGIN_COMMAND_PREFIX:link) adds a querystring" {
+  dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app --querystring "pool=5"
+  url=$(dokku config:get my_app STATSD_URL)
+  assert_contains "$url" "?pool=4"
+  dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
+}
