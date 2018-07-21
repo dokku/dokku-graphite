@@ -17,6 +17,7 @@ sudo dokku plugin:install https://github.com/dokku/dokku-graphite-grafana.git gr
 ## commands
 
 ```
+graphite:app-links <app>          List all graphite service links for a given app
 graphite:backup <name> <bucket> (--use-iam) NOT IMPLEMENTED
 graphite:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>) NOT IMPLEMENTED
 graphite:backup-deauth <name>     NOT IMPLEMENTED
