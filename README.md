@@ -48,6 +48,7 @@ graphite:start <name>             Start a previously stopped graphite service
 graphite:stop <name>              Stop a running graphite service
 graphite:unexpose <name>          Unexpose a previously exposed graphite service
 graphite:unlink <name> <app>      Unlink the graphite service from the app
+graphite:upgrade <name>           Upgrade service <service> to the specified version
 ```
 
 ## usage
