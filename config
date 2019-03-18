@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export GRAPHITE_IMAGE=${GRAPHITE_IMAGE:="dokkupaas/docker-grafana-graphite"}
 export GRAPHITE_IMAGE_VERSION=${GRAPHITE_IMAGE_VERSION:="3.0.1"}
-export GRAPHITE_ROOT=${GRAPHITE_ROOT:="/var/lib/dokku/services/grafana-graphite-statsd"}
+export GRAPHITE_ROOT=${GRAPHITE_ROOT:="$DOKKU_LIB_ROOT/services/grafana-graphite-statsd"}
 export GRAPHITE_HOST_ROOT=${GRAPHITE_HOST_ROOT:=$GRAPHITE_ROOT}
 
 export PLUGIN_UNIMPLEMENTED_SUBCOMMANDS=("backup" "backup-auth" "backup-deauth" "backup-schedule" "backup-schedule-cat" "backup-set-encryption" "backup-unschedule" "backup-unset-encryption" "clone" "connect" "export" "import")
