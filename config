@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 export GRAPHITE_IMAGE=${GRAPHITE_IMAGE:="dokku/docker-grafana-graphite"}
-export GRAPHITE_IMAGE_VERSION=${GRAPHITE_IMAGE_VERSION:="3.0.1"}
+export GRAPHITE_IMAGE_VERSION=${GRAPHITE_IMAGE_VERSION:="6.4.4"}
 export GRAPHITE_ROOT=${GRAPHITE_ROOT:="$DOKKU_LIB_ROOT/services/grafana-graphite-statsd"}
 export GRAPHITE_HOST_ROOT=${GRAPHITE_HOST_ROOT:=$GRAPHITE_ROOT}
 

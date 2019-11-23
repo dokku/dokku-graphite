@@ -1,6 +1,6 @@
 # dokku graphite [![Build Status](https://img.shields.io/travis/dokku/dokku-graphite-grafana.svg?branch=master "Build Status")](https://travis-ci.org/dokku/dokku-graphite-grafana) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
 
-Official grafana/graphite/statsd plugin for dokku. Currently defaults to installing [docker-grafana-graphite 3.0.1](https://hub.docker.com/r/dokku/docker-grafana-graphite) ([source](https://github.com/dokku/docker-grafana-graphite)).
+Official grafana/graphite/statsd plugin for dokku. Currently defaults to installing [docker-grafana-graphite 6.4.4](https://hub.docker.com/r/dokku/docker-grafana-graphite) ([source](https://github.com/dokku/docker-grafana-graphite)).
 
 ## requirements
 
@@ -62,7 +62,7 @@ dokku graphite:create lolipop
 # it *must* be compatible with the
 # dokku/docker-grafana-graphite image
 export GRAPHITE_IMAGE="dokku/docker-grafana-graphite"
-export GRAPHITE_IMAGE_VERSION="3.0.1"
+export GRAPHITE_IMAGE_VERSION="latest"
 dokku graphite:create lolipop
 
 # you can also specify custom environment
