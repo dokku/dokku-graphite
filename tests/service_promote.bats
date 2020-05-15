@@ -51,6 +51,7 @@ teardown() {
   run dokku config my_app
   assert_contains "${lines[*]}" "DOKKU_STATSD_"
 }
+
 @test "($PLUGIN_COMMAND_PREFIX:promote) uses STATSD_DATABASE_SCHEME variable" {
   dokku config:set my_app "STATSD_DATABASE_SCHEME=statsd2" "STATSD_URL=statsd://host:8125" "DOKKU_STATSD_BLUE_URL=statsd2://dokku-graphite-l:8125"
   dokku "$PLUGIN_COMMAND_PREFIX:promote" l my_app
