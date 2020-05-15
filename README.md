@@ -53,6 +53,14 @@ Help for any commands can be displayed by specifying the command as an argument 
 dokku graphite:create <service> [--create-flags...]
 ```
 
+flags:
+
+- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
+- `-i|--image IMAGE`: the image name to start the service with
+- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
+- `-p|--password PASSWORD`: override the user-level service password
+- `-r|--root-password PASSWORD`: override the root-level service password
+
 Create a graphite service named lolipop:
 
 ```shell
@@ -80,6 +88,19 @@ dokku graphite:create lolipop
 # usage
 dokku graphite:info <service> [--single-info-flag]
 ```
+
+flags:
+
+- `--config-dir`: show the service configuration directory
+- `--data-dir`: show the service data directory
+- `--dsn`: show the service DSN
+- `--exposed-ports`: show service exposed ports
+- `--id`: show the service container id
+- `--internal-ip`: show the service internal ip
+- `--links`: show the service app links
+- `--service-root`: show the service root directory
+- `--status`: show the service running status
+- `--version`: show the service image version
 
 Get connection information as follows:
 
@@ -122,6 +143,10 @@ dokku graphite:list
 dokku graphite:logs <service> [-t|--tail]
 ```
 
+flags:
+
+- `-t|--tail`: do not stop when end of the logs are reached and wait for additional output
+
 You can tail logs for a particular service:
 
 ```shell
@@ -140,6 +165,11 @@ dokku graphite:logs lolipop --tail
 # usage
 dokku graphite:link <service> <app> [--link-flags...]
 ```
+
+flags:
+
+- `-a|--alias "BLUE_DATABASE"`: an alternative alias to use for linking to an app via environment variable
+- `-q|--querystring "pool=5"`: ampersand delimited querystring arguments to append to the service link
 
 A graphite service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app.
 
@@ -323,6 +353,13 @@ dokku graphite:restart lolipop
 # usage
 dokku graphite:upgrade <service> [--upgrade-flags...]
 ```
+
+flags:
+
+- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
+- `-i|--image IMAGE`: the image name to start the service with
+- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
+- `-R|--restart-apps "true"`: whether to force an app restart
 
 You can upgrade an existing service to a new image or image-version:
 
