@@ -21,6 +21,7 @@ export PLUGIN_SCHEME="statsd"
 export PLUGIN_SERVICE="Graphite"
 export PLUGIN_VARIABLE="STATSD"
 export PLUGIN_BASE_PATH="$PLUGIN_PATH"
+export PLUGIN_CONFIG_SUFFIX="config"
 if [[ -n $DOKKU_API_VERSION ]]; then
   export PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
 fi
