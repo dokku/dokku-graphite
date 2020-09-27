@@ -1,6 +1,6 @@
 # dokku graphite [![Build Status](https://img.shields.io/circleci/project/github/dokku/dokku-graphite.svg?branch=master&style=flat-square "Build Status")](https://circleci.com/gh/dokku/dokku-graphite/tree/master) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg?style=flat-square "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
 
-Official graphite plugin for dokku. Currently defaults to installing [graphite 6.4.4](https://hub.docker.com/_/graphite/).
+Official graphite plugin for dokku. Currently defaults to installing [dokku/docker-grafana-graphite 6.4.4](https://hub.docker.com/r/dokku/docker-grafana-graphite/).
 
 ## Requirements
 
