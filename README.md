@@ -67,7 +67,7 @@ Create a graphite service named lolipop:
 dokku graphite:create lolipop
 ```
 
-You can also specify the image and image version to use for the service. It *must* be compatible with the dokku/docker-grafana-graphite image.
+You can also specify the image and image version to use for the service. It *must* be compatible with the dokku/docker-grafana-graphite image. 
 
 ```shell
 export STATSD_IMAGE="dokku/docker-grafana-graphite"
@@ -75,7 +75,7 @@ export STATSD_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku graphite:create lolipop
 ```
 
-You can also specify custom environment variables to start the graphite service in semi-colon separated form.
+You can also specify custom environment variables to start the graphite service in semi-colon separated form. 
 
 ```shell
 export STATSD_CUSTOM_ENV="USER=alpha;HOST=beta"
@@ -127,7 +127,7 @@ dokku graphite:info lolipop --version
 
 ```shell
 # usage
-dokku graphite:list
+dokku graphite:list 
 ```
 
 List all services:
@@ -171,7 +171,7 @@ flags:
 - `-a|--alias "BLUE_DATABASE"`: an alternative alias to use for linking to an app via environment variable
 - `-q|--querystring "pool=5"`: ampersand delimited querystring arguments to append to the service link
 
-A graphite service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app.
+A graphite service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app. 
 
 > NOTE: this will restart your app
 
@@ -202,7 +202,7 @@ The host exposed here only works internally in docker containers. If you want yo
 dokku graphite:link other_service playground
 ```
 
-It is possible to change the protocol for `STATSD_URL` by setting the environment variable `STATSD_DATABASE_SCHEME` on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding.
+It is possible to change the protocol for `STATSD_URL` by setting the environment variable `STATSD_DATABASE_SCHEME` on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding. 
 
 ```shell
 dokku config:set playground STATSD_DATABASE_SCHEME=statsd2
@@ -241,13 +241,13 @@ The lifecycle of each service can be managed through the following commands:
 dokku graphite:enter <service>
 ```
 
-A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
+A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk. 
 
 ```shell
 dokku graphite:enter lolipop
 ```
 
-You may also run a command directly against the service. Filesystem changes will not be saved to disk.
+You may also run a command directly against the service. Filesystem changes will not be saved to disk. 
 
 ```shell
 dokku graphite:enter lolipop touch /tmp/test
@@ -378,7 +378,7 @@ Service scripting can be executed using the following commands:
 dokku graphite:app-links <app>
 ```
 
-List all graphite services that are linked to the 'playground' app.
+List all graphite services that are linked to the 'playground' app. 
 
 ```shell
 dokku graphite:app-links playground
@@ -391,7 +391,7 @@ dokku graphite:app-links playground
 dokku graphite:exists <service>
 ```
 
-Here we check if the lolipop graphite service exists.
+Here we check if the lolipop graphite service exists. 
 
 ```shell
 dokku graphite:exists lolipop
@@ -404,7 +404,7 @@ dokku graphite:exists lolipop
 dokku graphite:linked <service> <app>
 ```
 
-Here we check if the lolipop graphite service is linked to the 'playground' app.
+Here we check if the lolipop graphite service is linked to the 'playground' app. 
 
 ```shell
 dokku graphite:linked lolipop playground
@@ -417,7 +417,7 @@ dokku graphite:linked lolipop playground
 dokku graphite:links <service>
 ```
 
-List all apps linked to the 'lolipop' graphite service.
+List all apps linked to the 'lolipop' graphite service. 
 
 ```shell
 dokku graphite:links lolipop
