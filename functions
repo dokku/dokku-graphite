@@ -79,8 +79,9 @@ service_create_container() {
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
-  dokku_log_info1 "Service $SERVICE available under $IP:80"
+  dokku_log_info1 "Grafana for $SERVICE available under $IP:80"
   dokku_log_info1 "Initial login/pass: admin/admin. Please change it on first login"
+  dokku_log_info1 "Graphite for $SERVICE available under $IP:81"
 }
 
 service_export() {

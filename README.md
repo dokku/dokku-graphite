@@ -263,7 +263,7 @@ dokku graphite:expose <service> <ports...>
 Expose the service on the service's normal ports, allowing access to it from the public interface (`0.0.0.0`):
 
 ```shell
-dokku graphite:expose lolipop 8125 8126 80 2003
+dokku graphite:expose lolipop 8125 8126 80 81 2003
 ```
 
 ### unexpose a previously exposed graphite service
