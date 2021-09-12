@@ -22,7 +22,7 @@ graphite:create <service> [--create-flags...]   # create a graphite service
 graphite:destroy <service> [-f|--force]         # delete the graphite service/data/container if there are no links left
 graphite:enter <service>                        # enter or run a command in a running graphite service container
 graphite:exists <service>                       # check if the graphite service exists
-graphite:expose <service> <ports...>            # expose a graphite service on custom port if provided (random port otherwise)
+graphite:expose <service> <ports...>            # expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 graphite:info <service> [--single-info-flag]    # print the service information
 graphite:link <service> <app> [--link-flags...] # link the graphite service to the app
 graphite:linked <service> <app>                 # check if the graphite service is linked to an app
@@ -253,7 +253,7 @@ You may also run a command directly against the service. Filesystem changes will
 dokku graphite:enter lolipop touch /tmp/test
 ```
 
-### expose a graphite service on custom port if provided (random port otherwise)
+### expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 
 ```shell
 # usage
@@ -264,6 +264,12 @@ Expose the service on the service's normal ports, allowing access to it from the
 
 ```shell
 dokku graphite:expose lolipop 8125 8126 80 81 2003
+```
+
+Expose the service on the service's normal ports, with the first on a specified ip adddress (127.0.0.1):
+
+```shell
+dokku graphite:expose lolipop 127.0.0.1:8125 8126 80 81 2003
 ```
 
 ### unexpose a previously exposed graphite service
