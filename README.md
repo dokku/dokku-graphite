@@ -64,10 +64,10 @@ flags:
 - `-r|--root-password PASSWORD`: override the root-level service password
 - `-s|--shm-size SHM_SIZE`: override shared memory size for graphite docker container
 
-Create a graphite service named lolipop:
+Create a graphite service named lollipop:
 
 ```shell
-dokku graphite:create lolipop
+dokku graphite:create lollipop
 ```
 
 You can also specify the image and image version to use for the service. It *must* be compatible with the dokku/docker-grafana-graphite image.
@@ -75,14 +75,14 @@ You can also specify the image and image version to use for the service. It *mus
 ```shell
 export STATSD_IMAGE="dokku/docker-grafana-graphite"
 export STATSD_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
-dokku graphite:create lolipop
+dokku graphite:create lollipop
 ```
 
 You can also specify custom environment variables to start the graphite service in semi-colon separated form.
 
 ```shell
 export STATSD_CUSTOM_ENV="USER=alpha;HOST=beta"
-dokku graphite:create lolipop
+dokku graphite:create lollipop
 ```
 
 ### print the service information
@@ -108,22 +108,22 @@ flags:
 Get connection information as follows:
 
 ```shell
-dokku graphite:info lolipop
+dokku graphite:info lollipop
 ```
 
 You can also retrieve a specific piece of service info via flags:
 
 ```shell
-dokku graphite:info lolipop --config-dir
-dokku graphite:info lolipop --data-dir
-dokku graphite:info lolipop --dsn
-dokku graphite:info lolipop --exposed-ports
-dokku graphite:info lolipop --id
-dokku graphite:info lolipop --internal-ip
-dokku graphite:info lolipop --links
-dokku graphite:info lolipop --service-root
-dokku graphite:info lolipop --status
-dokku graphite:info lolipop --version
+dokku graphite:info lollipop --config-dir
+dokku graphite:info lollipop --data-dir
+dokku graphite:info lollipop --dsn
+dokku graphite:info lollipop --exposed-ports
+dokku graphite:info lollipop --id
+dokku graphite:info lollipop --internal-ip
+dokku graphite:info lollipop --links
+dokku graphite:info lollipop --service-root
+dokku graphite:info lollipop --status
+dokku graphite:info lollipop --version
 ```
 
 ### list all graphite services
@@ -153,13 +153,13 @@ flags:
 You can tail logs for a particular service:
 
 ```shell
-dokku graphite:logs lolipop
+dokku graphite:logs lollipop
 ```
 
 By default, logs will not be tailed, but you can do this with the --tail flag:
 
 ```shell
-dokku graphite:logs lolipop --tail
+dokku graphite:logs lollipop --tail
 ```
 
 ### link the graphite service to the app
@@ -179,24 +179,24 @@ A graphite service can be linked to a container. This will use native docker lin
 > NOTE: this will restart your app
 
 ```shell
-dokku graphite:link lolipop playground
+dokku graphite:link lollipop playground
 ```
 
 The following environment variables will be set automatically by docker (not on the app itself, so they won’t be listed when calling dokku config):
 
 ```
-DOKKU_STATSD_LOLIPOP_NAME=/lolipop/DATABASE
-DOKKU_STATSD_LOLIPOP_PORT=tcp://172.17.0.1:8125
-DOKKU_STATSD_LOLIPOP_PORT_8125_TCP=tcp://172.17.0.1:8125
-DOKKU_STATSD_LOLIPOP_PORT_8125_TCP_PROTO=tcp
-DOKKU_STATSD_LOLIPOP_PORT_8125_TCP_PORT=8125
-DOKKU_STATSD_LOLIPOP_PORT_8125_TCP_ADDR=172.17.0.1
+DOKKU_STATSD_LOLLIPOP_NAME=/lollipop/DATABASE
+DOKKU_STATSD_LOLLIPOP_PORT=tcp://172.17.0.1:8125
+DOKKU_STATSD_LOLLIPOP_PORT_8125_TCP=tcp://172.17.0.1:8125
+DOKKU_STATSD_LOLLIPOP_PORT_8125_TCP_PROTO=tcp
+DOKKU_STATSD_LOLLIPOP_PORT_8125_TCP_PORT=8125
+DOKKU_STATSD_LOLLIPOP_PORT_8125_TCP_ADDR=172.17.0.1
 ```
 
 The following will be set on the linked application by default:
 
 ```
-STATSD_URL=statsd://dokku-graphite-lolipop:8125
+STATSD_URL=statsd://dokku-graphite-lollipop:8125
 ```
 
 The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
@@ -209,13 +209,13 @@ It is possible to change the protocol for `STATSD_URL` by setting the environmen
 
 ```shell
 dokku config:set playground STATSD_DATABASE_SCHEME=statsd2
-dokku graphite:link lolipop playground
+dokku graphite:link lollipop playground
 ```
 
 This will cause `STATSD_URL` to be set as:
 
 ```
-statsd2://dokku-graphite-lolipop:8125
+statsd2://dokku-graphite-lollipop:8125
 ```
 
 ### unlink the graphite service from the app
@@ -230,7 +230,7 @@ You can unlink a graphite service:
 > NOTE: this will restart your app and unset related environment variables
 
 ```shell
-dokku graphite:unlink lolipop playground
+dokku graphite:unlink lollipop playground
 ```
 
 ### Service Lifecycle
@@ -247,13 +247,13 @@ dokku graphite:enter <service>
 A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
 
 ```shell
-dokku graphite:enter lolipop
+dokku graphite:enter lollipop
 ```
 
 You may also run a command directly against the service. Filesystem changes will not be saved to disk.
 
 ```shell
-dokku graphite:enter lolipop touch /tmp/test
+dokku graphite:enter lollipop touch /tmp/test
 ```
 
 ### expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
@@ -266,13 +266,13 @@ dokku graphite:expose <service> <ports...>
 Expose the service on the service's normal ports, allowing access to it from the public interface (`0.0.0.0`):
 
 ```shell
-dokku graphite:expose lolipop 8125 8126 80 81 2003
+dokku graphite:expose lollipop 8125 8126 80 81 2003
 ```
 
 Expose the service on the service's normal ports, with the first on a specified ip adddress (127.0.0.1):
 
 ```shell
-dokku graphite:expose lolipop 127.0.0.1:8125 8126 80 81 2003
+dokku graphite:expose lollipop 127.0.0.1:8125 8126 80 81 2003
 ```
 
 ### unexpose a previously exposed graphite service
@@ -285,7 +285,7 @@ dokku graphite:unexpose <service>
 Unexpose the service, removing access to it from the public interface (`0.0.0.0`):
 
 ```shell
-dokku graphite:unexpose lolipop
+dokku graphite:unexpose lollipop
 ```
 
 ### promote service <service> as STATSD_URL in <app>
@@ -314,7 +314,7 @@ This will replace `STATSD_URL` with the url from other_service and generate anot
 ```
 STATSD_URL=statsd://other_service:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
 DOKKU_STATSD_BLUE_URL=statsd://other_service:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
-DOKKU_STATSD_SILVER_URL=statsd://lolipop:SOME_PASSWORD@dokku-graphite-lolipop:8125/lolipop
+DOKKU_STATSD_SILVER_URL=statsd://lollipop:SOME_PASSWORD@dokku-graphite-lollipop:8125/lollipop
 ```
 
 ### start a previously stopped graphite service
@@ -327,7 +327,7 @@ dokku graphite:start <service>
 Start the service:
 
 ```shell
-dokku graphite:start lolipop
+dokku graphite:start lollipop
 ```
 
 ### stop a running graphite service
@@ -340,7 +340,7 @@ dokku graphite:stop <service>
 Stop the service and the running container:
 
 ```shell
-dokku graphite:stop lolipop
+dokku graphite:stop lollipop
 ```
 
 ### graceful shutdown and restart of the graphite service container
@@ -353,7 +353,7 @@ dokku graphite:restart <service>
 Restart the service:
 
 ```shell
-dokku graphite:restart lolipop
+dokku graphite:restart lollipop
 ```
 
 ### upgrade service <service> to the specified versions
@@ -375,7 +375,7 @@ flags:
 You can upgrade an existing service to a new image or image-version:
 
 ```shell
-dokku graphite:upgrade lolipop
+dokku graphite:upgrade lollipop
 ```
 
 ### Service Automation
@@ -402,10 +402,10 @@ dokku graphite:app-links playground
 dokku graphite:exists <service>
 ```
 
-Here we check if the lolipop graphite service exists.
+Here we check if the lollipop graphite service exists.
 
 ```shell
-dokku graphite:exists lolipop
+dokku graphite:exists lollipop
 ```
 
 ### check if the graphite service is linked to an app
@@ -415,10 +415,10 @@ dokku graphite:exists lolipop
 dokku graphite:linked <service> <app>
 ```
 
-Here we check if the lolipop graphite service is linked to the `playground` app.
+Here we check if the lollipop graphite service is linked to the `playground` app.
 
 ```shell
-dokku graphite:linked lolipop playground
+dokku graphite:linked lollipop playground
 ```
 
 ### list all apps linked to the graphite service
@@ -428,10 +428,10 @@ dokku graphite:linked lolipop playground
 dokku graphite:links <service>
 ```
 
-List all apps linked to the `lolipop` graphite service.
+List all apps linked to the `lollipop` graphite service.
 
 ```shell
-dokku graphite:links lolipop
+dokku graphite:links lollipop
 ```
 
 ### Disabling `docker pull` calls

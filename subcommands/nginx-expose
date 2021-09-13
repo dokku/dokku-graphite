@@ -9,9 +9,9 @@ source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
 service-nginx-expose-cmd() {
   #E unexpose the service's grafana via nginx on all global vhosts
-  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-expose lolipop
+  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-expose lollipop
   #E unexpose the service's grafana via nginx on a specific domain
-  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-expose lolipop example.com
+  #E dokku $PLUGIN_COMMAND_PREFIX:nginx-expose lollipop example.com
   #A service, service to run command against
   #A domain, (optional) a domain to expose nginx on
   declare desc="expose the $PLUGIN_SERVICE service's grafana via an nginx vhost"
