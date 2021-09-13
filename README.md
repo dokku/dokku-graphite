@@ -246,6 +246,8 @@ dokku graphite:enter <service>
 
 A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
 
+> NOTE: disconnecting from ssh while running this command may leave zombie processes due to moby/moby#9098
+
 ```shell
 dokku graphite:enter lollipop
 ```
