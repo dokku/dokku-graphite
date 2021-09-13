@@ -195,7 +195,7 @@ DOKKU_STATSD_LOLIPOP_PORT_8125_TCP_ADDR=172.17.0.1
 The following will be set on the linked application by default:
 
 ```
-STATSD_URL=statsd://lolipop:SOME_PASSWORD@dokku-graphite-lolipop:8125/lolipop
+STATSD_URL=statsd://dokku-graphite-lolipop:8125
 ```
 
 The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
@@ -214,7 +214,7 @@ dokku graphite:link lolipop playground
 This will cause `STATSD_URL` to be set as:
 
 ```
-statsd2://lolipop:SOME_PASSWORD@dokku-graphite-lolipop:8125/lolipop
+statsd2://dokku-graphite-lolipop:8125
 ```
 
 ### unlink the graphite service from the app
