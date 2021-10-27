@@ -17,27 +17,27 @@ sudo dokku plugin:install https://github.com/dokku/dokku-graphite.git graphite
 ## Commands
 
 ```
-graphite:app-links <app>                        # list all graphite service links for a given app
-graphite:create <service> [--create-flags...]   # create a graphite service
-graphite:destroy <service> [-f|--force]         # delete the graphite service/data/container if there are no links left
-graphite:enter <service>                        # enter or run a command in a running graphite service container
-graphite:exists <service>                       # check if the graphite service exists
-graphite:expose <service> <ports...>            # expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
-graphite:info <service> [--single-info-flag]    # print the service information
-graphite:link <service> <app> [--link-flags...] # link the graphite service to the app
-graphite:linked <service> <app>                 # check if the graphite service is linked to an app
-graphite:links <service>                        # list all apps linked to the graphite service
-graphite:list                                   # list all graphite services
-graphite:logs <service> [-t|--tail]             # print the most recent log(s) for this service
-graphite:nginx-expose <service> <domain>        # expose the graphite service's grafana via an nginx vhost
-graphite:nginx-unexpose <service>               # expose the graphite service's grafana via an nginx vhost
-graphite:promote <service> <app>                # promote service <service> as STATSD_URL in <app>
-graphite:restart <service>                      # graceful shutdown and restart of the graphite service container
-graphite:start <service>                        # start a previously stopped graphite service
-graphite:stop <service>                         # stop a running graphite service
-graphite:unexpose <service>                     # unexpose a previously exposed graphite service
-graphite:unlink <service> <app>                 # unlink the graphite service from the app
-graphite:upgrade <service> [--upgrade-flags...] # upgrade service <service> to the specified versions
+graphite:app-links <app>                           # list all graphite service links for a given app
+graphite:create <service> [--create-flags...]      # create a graphite service
+graphite:destroy <service> [-f|--force]            # delete the graphite service/data/container if there are no links left
+graphite:enter <service>                           # enter or run a command in a running graphite service container
+graphite:exists <service>                          # check if the graphite service exists
+graphite:expose <service> <ports...>               # expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
+graphite:info <service> [--single-info-flag]       # print the service information
+graphite:link <service> <app> [--link-flags...]    # link the graphite service to the app
+graphite:linked <service> <app>                    # check if the graphite service is linked to an app
+graphite:links <service>                           # list all apps linked to the graphite service
+graphite:list                                      # list all graphite services
+graphite:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
+graphite:nginx-expose <service> <domain>           # expose the graphite service's grafana via an nginx vhost
+graphite:nginx-unexpose <service>                  # expose the graphite service's grafana via an nginx vhost
+graphite:promote <service> <app>                   # promote service <service> as STATSD_URL in <app>
+graphite:restart <service>                         # graceful shutdown and restart of the graphite service container
+graphite:start <service>                           # start a previously stopped graphite service
+graphite:stop <service>                            # stop a running graphite service
+graphite:unexpose <service>                        # unexpose a previously exposed graphite service
+graphite:unlink <service> <app>                    # unlink the graphite service from the app
+graphite:upgrade <service> [--upgrade-flags...]    # upgrade service <service> to the specified versions
 ```
 
 ## Usage
@@ -143,12 +143,12 @@ dokku graphite:list
 
 ```shell
 # usage
-dokku graphite:logs <service> [-t|--tail]
+dokku graphite:logs <service> [-t|--tail] <tail-num-optional>
 ```
 
 flags:
 
-- `-t|--tail`: do not stop when end of the logs are reached and wait for additional output
+- `-t|--tail [<tail-num>]`: do not stop when end of the logs are reached and wait for additional output
 
 You can tail logs for a particular service:
 
@@ -160,6 +160,12 @@ By default, logs will not be tailed, but you can do this with the --tail flag:
 
 ```shell
 dokku graphite:logs lollipop --tail
+```
+
+The default tail setting is to show all logs, but an initial count can also be specified:
+
+```shell
+dokku graphite:logs lollipop --tail 5
 ```
 
 ### link the graphite service to the app
