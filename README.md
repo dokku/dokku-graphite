@@ -31,6 +31,7 @@ graphite:list                                      # list all graphite services
 graphite:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
 graphite:nginx-expose <service> <domain>           # expose the graphite service's grafana via an nginx vhost
 graphite:nginx-unexpose <service>                  # expose the graphite service's grafana via an nginx vhost
+graphite:pause <service>                           # pause a running graphite service
 graphite:promote <service> <app>                   # promote service <service> as STATSD_URL in <app>
 graphite:restart <service>                         # graceful shutdown and restart of the graphite service container
 graphite:start <service>                           # start a previously stopped graphite service
@@ -345,10 +346,23 @@ dokku graphite:start lollipop
 dokku graphite:stop <service>
 ```
 
-Stop the service and the running container:
+Stop the service and removes the running container:
 
 ```shell
 dokku graphite:stop lollipop
+```
+
+### pause a running graphite service
+
+```shell
+# usage
+dokku graphite:pause <service>
+```
+
+Pause the running container for the service:
+
+```shell
+dokku graphite:pause lollipop
 ```
 
 ### graceful shutdown and restart of the graphite service container
