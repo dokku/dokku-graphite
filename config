@@ -3,7 +3,8 @@ _DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export GRAPHITE_IMAGE=${GRAPHITE_IMAGE:="$(awk -F '[ :]' '{print $2}' "${_DIR}/Dockerfile")"}
 export GRAPHITE_IMAGE_VERSION=${GRAPHITE_IMAGE_VERSION:="$(awk -F '[ :]' '{print $3}' "${_DIR}/Dockerfile")"}
 export GRAPHITE_ROOT=${GRAPHITE_ROOT:="$DOKKU_LIB_ROOT/services/grafana-graphite-statsd"}
-export GRAPHITE_HOST_ROOT=${GRAPHITE_HOST_ROOT:=$GRAPHITE_ROOT}
+export DOKKU_LIB_HOST_ROOT=${DOKKU_LIB_HOST_ROOT:=$DOKKU_LIB_ROOT}
+export GRAPHITE_HOST_ROOT=${GRAPHITE_HOST_ROOT:="$DOKKU_LIB_HOST_ROOT/services/grafana-graphite-statsd"}
 
 export PLUGIN_UNIMPLEMENTED_SUBCOMMANDS=("backup" "backup-auth" "backup-deauth" "backup-schedule" "backup-schedule-cat" "backup-set-encryption" "backup-unschedule" "backup-unset-encryption" "clone" "connect" "export" "import")
 export PLUGIN_COMMAND_PREFIX="graphite"
