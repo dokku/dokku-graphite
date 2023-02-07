@@ -34,6 +34,7 @@ graphite:nginx-unexpose <service>                  # expose the graphite service
 graphite:pause <service>                           # pause a running graphite service
 graphite:promote <service> <app>                   # promote service <service> as STATSD_URL in <app>
 graphite:restart <service>                         # graceful shutdown and restart of the graphite service container
+graphite:set <service> <key> <value>               # set or clear a property for a service
 graphite:start <service>                           # start a previously stopped graphite service
 graphite:stop <service>                            # stop a running graphite service
 graphite:unexpose <service>                        # unexpose a previously exposed graphite service
@@ -238,6 +239,25 @@ You can unlink a graphite service:
 
 ```shell
 dokku graphite:unlink lollipop playground
+```
+
+### set or clear a property for a service
+
+```shell
+# usage
+dokku graphite:set <service> <key> <value>
+```
+
+Set the network to attach after the service container is started:
+
+```shell
+dokku graphite:set lollipop post-create-network custom-network
+```
+
+Unset the post-create-network value:
+
+```shell
+dokku graphite:set lollipop post-create-network
 ```
 
 ### Service Lifecycle
