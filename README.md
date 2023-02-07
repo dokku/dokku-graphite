@@ -102,7 +102,10 @@ flags:
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
 - `--internal-ip`: show the service internal ip
+- `--initial-network`: show the initial network being connected to
 - `--links`: show the service app links
+- `--post-create-network`: show the networks to attach to after service container creation
+- `--post-start-network`: show the networks to attach to after service container start
 - `--service-root`: show the service root directory
 - `--status`: show the service running status
 - `--version`: show the service image version
@@ -122,7 +125,10 @@ dokku graphite:info lollipop --dsn
 dokku graphite:info lollipop --exposed-ports
 dokku graphite:info lollipop --id
 dokku graphite:info lollipop --internal-ip
+dokku graphite:info lollipop --initial-network
 dokku graphite:info lollipop --links
+dokku graphite:info lollipop --post-create-network
+dokku graphite:info lollipop --post-start-network
 dokku graphite:info lollipop --service-root
 dokku graphite:info lollipop --status
 dokku graphite:info lollipop --version
