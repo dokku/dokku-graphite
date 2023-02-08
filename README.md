@@ -34,6 +34,7 @@ graphite:nginx-unexpose <service>                  # expose the graphite service
 graphite:pause <service>                           # pause a running graphite service
 graphite:promote <service> <app>                   # promote service <service> as STATSD_URL in <app>
 graphite:restart <service>                         # graceful shutdown and restart of the graphite service container
+graphite:set <service> <key> <value>               # set or clear a property for a service
 graphite:start <service>                           # start a previously stopped graphite service
 graphite:stop <service>                            # stop a running graphite service
 graphite:unexpose <service>                        # unexpose a previously exposed graphite service
@@ -101,7 +102,10 @@ flags:
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
 - `--internal-ip`: show the service internal ip
+- `--initial-network`: show the initial network being connected to
 - `--links`: show the service app links
+- `--post-create-network`: show the networks to attach to after service container creation
+- `--post-start-network`: show the networks to attach to after service container start
 - `--service-root`: show the service root directory
 - `--status`: show the service running status
 - `--version`: show the service image version
@@ -121,7 +125,10 @@ dokku graphite:info lollipop --dsn
 dokku graphite:info lollipop --exposed-ports
 dokku graphite:info lollipop --id
 dokku graphite:info lollipop --internal-ip
+dokku graphite:info lollipop --initial-network
 dokku graphite:info lollipop --links
+dokku graphite:info lollipop --post-create-network
+dokku graphite:info lollipop --post-start-network
 dokku graphite:info lollipop --service-root
 dokku graphite:info lollipop --status
 dokku graphite:info lollipop --version
@@ -238,6 +245,31 @@ You can unlink a graphite service:
 
 ```shell
 dokku graphite:unlink lollipop playground
+```
+
+### set or clear a property for a service
+
+```shell
+# usage
+dokku graphite:set <service> <key> <value>
+```
+
+Set the network to attach after the service container is started:
+
+```shell
+dokku graphite:set lollipop post-create-network custom-network
+```
+
+Set multiple networks:
+
+```shell
+dokku graphite:set lollipop post-create-network custom-network,other-network
+```
+
+Unset the post-create-network value:
+
+```shell
+dokku graphite:set lollipop post-create-network
 ```
 
 ### Service Lifecycle
