@@ -1,4 +1,4 @@
 [plugin]
 description = "dokku statsd & graphite service plugin with grafana dashboard"
-version = "1.25.0"
+version = "1.26.0"
 [plugin.config]
