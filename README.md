@@ -83,7 +83,7 @@ export STATSD_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku graphite:create lollipop
 ```
 
-You can also specify custom environment variables to start the graphite service in semi-colon separated form.
+You can also specify custom environment variables to start the graphite service in semicolon-separated form.
 
 ```shell
 export STATSD_CUSTOM_ENV="USER=alpha;HOST=beta"
