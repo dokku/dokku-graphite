@@ -11,7 +11,7 @@ Official graphite plugin for dokku. Currently defaults to installing [dokku/dock
 
 ```shell
 # on 0.19.x+
-sudo dokku plugin:install https://github.com/dokku/dokku-graphite.git graphite
+sudo dokku plugin:install https://github.com/dokku/dokku-graphite.git --name graphite
 ```
 
 ## Commands
