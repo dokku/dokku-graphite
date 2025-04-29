@@ -500,7 +500,6 @@ List all apps linked to the `lollipop` graphite service.
 ```shell
 dokku graphite:links lollipop
 ```
-
 ### Backups
 
 Datastore backups are supported via AWS S3 and S3 compatible services like [minio](https://github.com/minio/minio).
