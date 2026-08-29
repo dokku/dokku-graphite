@@ -71,6 +71,12 @@ service_create_container() {
 
   local network_alias="$(service_dns_hostname "$SERVICE")"
 
+  if [[ -z "$(ls -A "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX" 2>/dev/null)" ]]; then
+    "$DOCKER_BIN" container create --name "${SERVICE_NAME}-conf-extract" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" true >/dev/null 2>&1
+    "$DOCKER_BIN" cp "${SERVICE_NAME}-conf-extract:/opt/graphite/conf/." "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/" 2>/dev/null || true
+    "$DOCKER_BIN" rm "${SERVICE_NAME}-conf-extract" >/dev/null 2>&1
+  fi
+
   rm -f "$SERVICE_ROOT/ID"
   declare -a DOCKER_ARGS
   DOCKER_ARGS=()
@@ -84,6 +90,7 @@ service_create_container() {
   DOCKER_ARGS+=("--restart=always")
   DOCKER_ARGS+=("--volume=$SERVICE_HOST_ROOT/data/grafana:/opt/grafana/data")
   DOCKER_ARGS+=("--volume=$SERVICE_HOST_ROOT/data/whisper:/opt/graphite/storage/whisper")
+  DOCKER_ARGS+=("--volume=$SERVICE_HOST_ROOT/config:/opt/graphite/conf")
 
   declare -a LINK_CONTAINER_DOCKER_ARGS
   LINK_CONTAINER_DOCKER_ARGS=()
