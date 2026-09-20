@@ -51,6 +51,11 @@ services:
 
 x-dokku:
   plugin: graphite
+  # graphite's services have always been stored under the name of the image it
+  # runs rather than the name it is called by, and an install that already has
+  # them keeps them: moving live data to tidy up a directory name is not worth
+  # what it risks
+  data_directory: grafana-graphite-statsd
   title: Graphite
   scheme: statsd
 
