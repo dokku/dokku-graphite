@@ -1,0 +1,121 @@
+---
+services:
+  graphite:
+    image: "{{ .Image }}:{{ .ImageVersion }}"
+
+    environment:
+      # the grafana account's password. The bash plugin passes this too, but
+      # reads it from a variable it never assigns, so every service it creates
+      # starts with an empty one.
+      GRAPHITE_PASSWORD: "{{ .Secret.password }}"
+
+    volumes:
+      - type: bind
+        source: "{{ .HostRoot }}/data/grafana"
+        target: /opt/grafana/data
+      - type: bind
+        source: "{{ .HostRoot }}/data/whisper"
+        target: /opt/graphite/storage/whisper
+
+    ports:
+      # where an app sends its metrics, which is what a linked app is handed.
+      #
+      # statsd speaks udp, which the bash plugin has no way to say and so has
+      # always exposed as tcp. Recording it here does not fix that, and cannot:
+      # the ambassador forwards with socat over TCP4 in both of its branches,
+      # and picks what to forward by matching link variables ending in _TCP, so
+      # a udp port is not merely unforwarded but invisible to it. Exposing this
+      # port properly needs a different ambassador image, not a change here.
+      #
+      # It is recorded anyway because it is true, and because readiness now
+      # refuses to probe a udp port rather than silently connecting to one.
+      - name: statsd
+        target: 8125
+        protocol: udp
+        primary: true
+
+      # statsd's own administrative interface
+      - name: statsd_admin
+        target: 8126
+
+      # grafana, which is the page a person looks at
+      - name: web
+        target: 80
+
+      - name: web_alt
+        target: 81
+
+      # where carbon accepts metrics in its own line protocol
+      - name: carbon
+        target: 2003
+
+x-dokku:
+  plugin: graphite
+  # graphite's services have always been stored under the name of the image it
+  # runs rather than the name it is called by, and an install that already has
+  # them keeps them: moving live data to tidy up a directory name is not worth
+  # what it risks
+  data_directory: grafana-graphite-statsd
+  title: Graphite
+  scheme: statsd
+
+  # STATSD rather than GRAPHITE, for the alias and for every variable the
+  # plugin reads. The one exception is GRAPHITE_DISABLE_PULL, which is derived
+  # from the name instead, and the two rules look identical without being it.
+  alias: STATSD
+  variable: STATSD
+  alt_alias: DOKKU_STATSD
+
+  dsn: "{{ .Scheme }}://{{ .Host }}:{{ .Port.statsd }}"
+
+  # readiness is grafana rather than the metrics port: statsd speaks udp, where
+  # a connection proves nothing, and the third entry in a list is what the bash
+  # plugin had to name this by position
+  wait: web
+
+  secrets:
+    password:
+      file: PASSWORD
+      length: 16
+      env: SERVICE_PASSWORD
+
+  # no connect, export or import: graphite is a metrics store reached over its
+  # own protocols, and the image ships no client and no dump tool. Clone and
+  # the backup family fall out of that, which is the list the bash plugin kept
+  # by hand.
+
+  custom_commands:
+    nginx-expose:
+      # on the host, because what it produces is configuration for the host's
+      # own nginx. The script runs unprivileged and hands the finished vhost to
+      # the privileged helper, which is the only part that is granted root.
+      mode: host
+      description: expose the {{.Title}} service's grafana via an nginx vhost
+      documentation: |
+        expose the {{.Title}} service's grafana via an nginx vhost
+        > NOTE: with no domain, grafana answers to grafana-<service>.<vhost> for every global vhost
+        dokku {{.CommandPrefix}}:nginx-expose lollipop
+        dokku {{.CommandPrefix}}:nginx-expose lollipop example.com
+      arguments:
+        - name: domain
+          description: a domain to expose grafana on, defaulting to the global vhosts
+          optional: true
+      exec:
+        - nginx-expose
+        # an absent domain renders empty and is dropped, so the script sees no
+        # argument at all rather than an empty one
+        - "{{ .Args.domain }}"
+      env:
+        GRAPHITE_SERVICE: "{{ .ServiceName }}"
+        GRAPHITE_CONTAINER: "{{ .ContainerName }}"
+
+    nginx-unexpose:
+      mode: host
+      description: unexpose the {{.Title}} service's grafana
+      documentation: |
+        unexpose the {{.Title}} service's grafana
+        dokku {{.CommandPrefix}}:nginx-unexpose lollipop
+      exec:
+        - nginx-unexpose
+      env:
+        GRAPHITE_SERVICE: "{{ .ServiceName }}"

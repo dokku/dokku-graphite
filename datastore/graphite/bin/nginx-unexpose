@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Takes the service's grafana back out of nginx.
+#
+# Removing the file and reloading nginx both need root, so both happen in the
+# helper; there is nothing for this side to work out first.
+set -eo pipefail
+
+SERVICE="${GRAPHITE_SERVICE:?the service name is passed by the definition}"
+
+sudo /usr/local/bin/dokku-graphite-nginx remove "$SERVICE"
+
+echo "Grafana for $SERVICE is no longer exposed"
