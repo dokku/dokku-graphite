@@ -4,43 +4,41 @@ Official graphite plugin for dokku. Currently defaults to installing [dokku/dock
 
 ## Requirements
 
-- dokku 0.19.x+
+- dokku 0.35.x+
 - docker 1.8.x
 
 ## Installation
 
 ```shell
-# on 0.19.x+
+# on 0.35.x+
 sudo dokku plugin:install https://github.com/dokku/dokku-graphite.git --name graphite
 ```
 
 ## Commands
 
 ```
-graphite:app-links <app>                           # list all graphite service links for a given app
-graphite:backup-set-public-key-encryption <service> <public-key-id> # set GPG Public Key encryption for all future backups of graphite service
-graphite:backup-unset-public-key-encryption <service> # unset GPG Public Key encryption for future backups of the graphite service
-graphite:create <service> [--create-flags...]      # create a graphite service
-graphite:destroy <service> [-f|--force]            # delete the graphite service/data/container if there are no links left
-graphite:enter <service>                           # enter or run a command in a running graphite service container
-graphite:exists <service>                          # check if the graphite service exists
-graphite:expose <service> <ports...>               # expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
-graphite:info <service> [--single-info-flag]       # print the service information
-graphite:link <service> <app> [--link-flags...]    # link the graphite service to the app
-graphite:linked <service> <app>                    # check if the graphite service is linked to an app
-graphite:links <service>                           # list all apps linked to the graphite service
-graphite:list                                      # list all graphite services
-graphite:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
-graphite:nginx-expose <service> <domain>           # expose the graphite service's grafana via an nginx vhost
-graphite:nginx-unexpose <service>                  # expose the graphite service's grafana via an nginx vhost
-graphite:pause <service>                           # pause a running graphite service
-graphite:promote <service> <app>                   # promote service <service> as STATSD_URL in <app>
-graphite:restart <service>                         # graceful shutdown and restart of the graphite service container
+graphite:app-links [<app>]                         # list all Graphite service links for a given app
+graphite:create <service> [--create-flags...]      # create a Graphite service
+graphite:destroy <service> [-f|--force]            # delete the Graphite service/data/container if there are no links left
+graphite:enter <service>                           # enter or run a command in a running Graphite service container
+graphite:exists <service>                          # check if the Graphite service exists
+graphite:expose <service> <ports...>               # expose a Graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
+graphite:info <service> [--info-flags...]          # print the service information
+graphite:link <service> [<app>] [--link-flags...]  # link the Graphite service to the app
+graphite:linked <service> [<app>]                  # check if the Graphite service is linked to an app
+graphite:links <service>                           # list all apps linked to the Graphite service
+graphite:list                                      # list all Graphite services
+graphite:logs <service> [-t|--tail [<tail-num>]]   # print the most recent log(s) for this service
+graphite:nginx-expose <service> [domain]           # expose the Graphite service's grafana via an nginx vhost
+graphite:nginx-unexpose <service>                  # unexpose the Graphite service's grafana
+graphite:pause <service>                           # pause a running Graphite service
+graphite:promote <service> [<app>]                 # promote service <service> as STATSD_URL in <app>
+graphite:restart <service>                         # graceful shutdown and restart of the Graphite service container
 graphite:set <service> <key> <value>               # set or clear a property for a service
-graphite:start <service>                           # start a previously stopped graphite service
-graphite:stop <service>                            # stop a running graphite service
-graphite:unexpose <service>                        # unexpose a previously exposed graphite service
-graphite:unlink <service> <app>                    # unlink the graphite service from the app
+graphite:start <service>                           # start a previously stopped Graphite service
+graphite:stop <service>                            # stop a running Graphite service
+graphite:unexpose <service>                        # unexpose a previously exposed Graphite service
+graphite:unlink <service> [<app>] [-n|--no-restart] # unlink the Graphite service from the app
 graphite:upgrade <service> [--upgrade-flags...]    # upgrade service <service> to the specified versions
 ```
 
@@ -50,7 +48,7 @@ Help for any commands can be displayed by specifying the command as an argument 
 
 ### Basic Usage
 
-### create a graphite service
+### create a Graphite service
 
 ```shell
 # usage
@@ -59,17 +57,17 @@ dokku graphite:create <service> [--create-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: `None`)
-- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
-- `-i|--image IMAGE`: the image name to start the service with
-- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
-- `-m|--memory MEMORY`: container memory limit in megabytes (default: unlimited)
-- `-N|--initial-network INITIAL_NETWORK`: the initial network to attach the service to
-- `-p|--password PASSWORD`: override the user-level service password
-- `-P|--post-create-network NETWORKS`: a comma-separated list of networks to attach the service container to after service creation
-- `-r|--root-password PASSWORD`: override the root-level service password
-- `-S|--post-start-network NETWORKS`: a comma-separated list of networks to attach the service container to after service start
-- `-s|--shm-size SHM_SIZE`: override shared memory size for graphite docker container
+- `-c|--config-options <string>`: extra arguments to pass to the container create command
+- `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
+- `-i|--image <string>`: the image name to start the service with
+- `-I|--image-version <string>`: the image version to start the service with
+- `-N|--initial-network <string>`: the initial network to attach the service to
+- `-m|--memory <int>`: container memory limit in megabytes (default: unlimited)
+- `-p|--password <string>`: override the user-level service password
+- `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
+- `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
+- `-r|--root-password <string>`: override the root-level service password
+- `-s|--shm-size <string>`: override shared memory size for the service docker container
 
 Create a graphite service named lollipop:
 
@@ -81,7 +79,7 @@ You can also specify the image and image version to use for the service. It *mus
 
 ```shell
 export STATSD_IMAGE="dokku/docker-grafana-graphite"
-export STATSD_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
+export STATSD_IMAGE_VERSION="6.4.4"
 dokku graphite:create lollipop
 ```
 
@@ -92,11 +90,28 @@ export STATSD_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku graphite:create lollipop
 ```
 
+### delete the Graphite service/data/container if there are no links left
+
+```shell
+# usage
+dokku graphite:destroy <service> [-f|--force]
+```
+
+flags:
+
+- `-f|--force`: force the destruction of the service
+
+Destroy the service, it's data, and the running container:
+
+```shell
+dokku graphite:destroy lollipop
+```
+
 ### print the service information
 
 ```shell
 # usage
-dokku graphite:info <service> [--single-info-flag]
+dokku graphite:info <service> [--info-flags...]
 ```
 
 flags:
@@ -106,8 +121,8 @@ flags:
 - `--dsn`: show the service DSN
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
-- `--internal-ip`: show the service internal ip
 - `--initial-network`: show the initial network being connected to
+- `--internal-ip`: show the service internal ip
 - `--links`: show the service app links
 - `--post-create-network`: show the networks to attach to after service container creation
 - `--post-start-network`: show the networks to attach to after service container start
@@ -139,7 +154,7 @@ dokku graphite:info lollipop --status
 dokku graphite:info lollipop --version
 ```
 
-### list all graphite services
+### list all Graphite services
 
 ```shell
 # usage
@@ -156,12 +171,12 @@ dokku graphite:list
 
 ```shell
 # usage
-dokku graphite:logs <service> [-t|--tail] <tail-num-optional>
+dokku graphite:logs <service> [-t|--tail [<tail-num>]]
 ```
 
 flags:
 
-- `-t|--tail [<tail-num>]`: do not stop when end of the logs are reached and wait for additional output
+- `-t|--tail <int>`: tail the logs, optionally showing this many lines
 
 You can tail logs for a particular service:
 
@@ -175,24 +190,24 @@ By default, logs will not be tailed, but you can do this with the --tail flag:
 dokku graphite:logs lollipop --tail
 ```
 
-The default tail setting is to show all logs, but an initial count can also be specified:
+By default the last 100 lines are shown, but a different count can be specified:
 
 ```shell
-dokku graphite:logs lollipop --tail 5
+dokku graphite:logs lollipop --tail=5
 ```
 
-### link the graphite service to the app
+### link the Graphite service to the app
 
 ```shell
 # usage
-dokku graphite:link <service> <app> [--link-flags...]
+dokku graphite:link <service> [<app>] [--link-flags...]
 ```
 
 flags:
 
-- `-a|--alias "BLUE_DATABASE"`: an alternative alias to use for linking to an app via environment variable
-- `-q|--querystring "pool=5"`: ampersand delimited querystring arguments to append to the service link
-- `-n|--no-restart "false"`: whether or not to restart the app on link (default: true)
+- `-a|--alias <string>`: an alternative alias to use for the config url exported to the app
+- `-n|--no-restart`: whether to skip restarting the app
+- `-q|--querystring <string>`: ampersand delimited querystring arguments to append to the service url
 
 A graphite service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our `playground` app.
 
@@ -216,7 +231,7 @@ DOKKU_STATSD_LOLLIPOP_PORT_8125_TCP_ADDR=172.17.0.1
 The following will be set on the linked application by default:
 
 ```
-STATSD_URL=statsd://dokku-graphite-lollipop:8125
+STATSD_URL=statsd://:SOME_PASSWORD@dokku-graphite-lollipop:8125
 ```
 
 The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
@@ -235,19 +250,19 @@ dokku graphite:link lollipop playground
 This will cause `STATSD_URL` to be set as:
 
 ```
-statsd2://dokku-graphite-lollipop:8125
+statsd2://:SOME_PASSWORD@dokku-graphite-lollipop:8125
 ```
 
-### unlink the graphite service from the app
+### unlink the Graphite service from the app
 
 ```shell
 # usage
-dokku graphite:unlink <service> <app>
+dokku graphite:unlink <service> [<app>] [-n|--no-restart]
 ```
 
 flags:
 
-- `-n|--no-restart "false"`: whether or not to restart the app on unlink (default: true)
+- `-n|--no-restart`: whether to skip restarting the app
 
 You can unlink a graphite service:
 
@@ -282,11 +297,17 @@ Unset the post-create-network value:
 dokku graphite:set lollipop post-create-network
 ```
 
+Set the keyserver a public key for backup encryption is fetched from:
+
+```shell
+dokku graphite:set lollipop backup-keyserver hkp://keys.example.com
+```
+
 ### Service Lifecycle
 
 The lifecycle of each service can be managed through the following commands:
 
-### enter or run a command in a running graphite service container
+### enter or run a command in a running Graphite service container
 
 ```shell
 # usage
@@ -307,7 +328,7 @@ You may also run a command directly against the service. Filesystem changes will
 dokku graphite:enter lollipop touch /tmp/test
 ```
 
-### expose a graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
+### expose a Graphite service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 
 ```shell
 # usage
@@ -326,7 +347,7 @@ Expose the service on the service's normal ports, with the first on a specified 
 dokku graphite:expose lollipop 127.0.0.1:8125 8126 80 81 2003
 ```
 
-### unexpose a previously exposed graphite service
+### unexpose a previously exposed Graphite service
 
 ```shell
 # usage
@@ -343,13 +364,13 @@ dokku graphite:unexpose lollipop
 
 ```shell
 # usage
-dokku graphite:promote <service> <app>
+dokku graphite:promote <service> [<app>]
 ```
 
 If you have a graphite service linked to an app and try to link another graphite service another link environment variable will be generated automatically:
 
 ```
-DOKKU_STATSD_BLUE_URL=statsd://other_service:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
+DOKKU_STATSD_BLUE_URL=statsd://:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
 ```
 
 You can promote the new service to be the primary one:
@@ -363,12 +384,12 @@ dokku graphite:promote other_service playground
 This will replace `STATSD_URL` with the url from other_service and generate another environment variable to hold the previous value if necessary. You could end up with the following for example:
 
 ```
-STATSD_URL=statsd://other_service:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
-DOKKU_STATSD_BLUE_URL=statsd://other_service:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
-DOKKU_STATSD_SILVER_URL=statsd://lollipop:SOME_PASSWORD@dokku-graphite-lollipop:8125/lollipop
+STATSD_URL=statsd://:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
+DOKKU_STATSD_BLUE_URL=statsd://:ANOTHER_PASSWORD@dokku-graphite-other-service:8125/other_service
+DOKKU_STATSD_SILVER_URL=statsd://:SOME_PASSWORD@dokku-graphite-lollipop:8125/lollipop
 ```
 
-### start a previously stopped graphite service
+### start a previously stopped Graphite service
 
 ```shell
 # usage
@@ -381,7 +402,7 @@ Start the service:
 dokku graphite:start lollipop
 ```
 
-### stop a running graphite service
+### stop a running Graphite service
 
 ```shell
 # usage
@@ -394,7 +415,7 @@ Stop the service and removes the running container:
 dokku graphite:stop lollipop
 ```
 
-### pause a running graphite service
+### pause a running Graphite service
 
 ```shell
 # usage
@@ -407,7 +428,7 @@ Pause the running container for the service:
 dokku graphite:pause lollipop
 ```
 
-### graceful shutdown and restart of the graphite service container
+### graceful shutdown and restart of the Graphite service container
 
 ```shell
 # usage
@@ -429,15 +450,15 @@ dokku graphite:upgrade <service> [--upgrade-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: `None`)
-- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
-- `-i|--image IMAGE`: the image name to start the service with
-- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
-- `-N|--initial-network INITIAL_NETWORK`: the initial network to attach the service to
-- `-P|--post-create-network NETWORKS`: a comma-separated list of networks to attach the service container to after service creation
-- `-R|--restart-apps "true"`: whether or not to force an app restart (default: false)
-- `-S|--post-start-network NETWORKS`: a comma-separated list of networks to attach the service container to after service start
-- `-s|--shm-size SHM_SIZE`: override shared memory size for graphite docker container
+- `-c|--config-options <string>`: extra arguments to pass to the container create command
+- `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
+- `-i|--image <string>`: the image to upgrade the service to
+- `-I|--image-version <string>`: the image version to upgrade the service to
+- `-N|--initial-network <string>`: the initial network to attach the service to
+- `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
+- `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
+- `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade
+- `-s|--shm-size <string>`: override shared memory size for the service docker container
 
 You can upgrade an existing service to a new image or image-version:
 
@@ -449,11 +470,11 @@ dokku graphite:upgrade lollipop
 
 Service scripting can be executed using the following commands:
 
-### list all graphite service links for a given app
+### list all Graphite service links for a given app
 
 ```shell
 # usage
-dokku graphite:app-links <app>
+dokku graphite:app-links [<app>]
 ```
 
 List all graphite services that are linked to the `playground` app.
@@ -462,7 +483,7 @@ List all graphite services that are linked to the `playground` app.
 dokku graphite:app-links playground
 ```
 
-### check if the graphite service exists
+### check if the Graphite service exists
 
 ```shell
 # usage
@@ -475,11 +496,11 @@ Here we check if the lollipop graphite service exists.
 dokku graphite:exists lollipop
 ```
 
-### check if the graphite service is linked to an app
+### check if the Graphite service is linked to an app
 
 ```shell
 # usage
-dokku graphite:linked <service> <app>
+dokku graphite:linked <service> [<app>]
 ```
 
 Here we check if the lollipop graphite service is linked to the `playground` app.
@@ -488,7 +509,7 @@ Here we check if the lollipop graphite service is linked to the `playground` app
 dokku graphite:linked lollipop playground
 ```
 
-### list all apps linked to the graphite service
+### list all apps linked to the Graphite service
 
 ```shell
 # usage
@@ -500,44 +521,38 @@ List all apps linked to the `lollipop` graphite service.
 ```shell
 dokku graphite:links lollipop
 ```
-### Backups
 
-Datastore backups are supported via AWS S3 and S3 compatible services like [minio](https://github.com/minio/minio).
+### Custom Commands
 
-You may skip the `backup-auth` step if your dokku install is running within EC2 and has access to the bucket via an IAM profile. In that case, use the `--use-iam` option with the `backup` command.
+This datastore adds the following commands of its own:
 
-If both passphrase and public key forms of encryption are set, the public key encryption will take precedence.
-
-The underlying core backup script is present [here](https://github.com/dokku/docker-s3backup/blob/main/backup.sh).
-
-Backups can be performed using the backup commands:
-
-### set GPG Public Key encryption for all future backups of graphite service
+### expose the Graphite service's grafana via an nginx vhost
 
 ```shell
 # usage
-dokku graphite:backup-set-public-key-encryption <service> <public-key-id>
+dokku graphite:nginx-expose <service> [domain]
 ```
 
-Set the `GPG` Public Key for encrypting backups:
+Expose the Graphite service's grafana via an nginx vhost:
+
+> NOTE: with no domain, grafana answers to grafana-<service>.<vhost> for every global vhost
 
 ```shell
-dokku graphite:backup-set-public-key-encryption lollipop
+dokku graphite:nginx-expose lollipop
+dokku graphite:nginx-expose lollipop example.com
 ```
 
-This method currently requires the <public-key-id> to be present on the keyserver `keyserver.ubuntu.com`:
-
-### unset GPG Public Key encryption for future backups of the graphite service
+### unexpose the Graphite service's grafana
 
 ```shell
 # usage
-dokku graphite:backup-unset-public-key-encryption <service>
+dokku graphite:nginx-unexpose <service>
 ```
 
-Unset the `GPG` Public Key encryption for backups:
+Unexpose the Graphite service's grafana:
 
 ```shell
-dokku graphite:backup-unset-public-key-encryption lollipop
+dokku graphite:nginx-unexpose lollipop
 ```
 
 ### Disabling `docker image pull` calls

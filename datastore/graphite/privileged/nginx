@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# The part of exposing grafana that needs root: putting a vhost under
+# /etc/nginx and reloading nginx.
+#
+# It is installed root owned, outside anything the dokku user can write, and
+# granted in sudoers with no constraint on its arguments, because a rule that
+# matched arguments would be rejected by sudo-rs and leave the dokku group with
+# no privileges at all. That makes the handling here the only thing between the
+# dokku group and an arbitrary write as root, so the service name is validated
+# and the path is derived from the validated name rather than taken from the
+# caller. The vhost itself arrives on stdin: the caller chooses the contents,
+# never the destination.
+set -eo pipefail
+
+usage() {
+  echo "usage: ${0##*/} install <service>" >&2
+  echo "       ${0##*/} remove <service>" >&2
+  exit 2
+}
+
+validate_service() {
+  local service="$1"
+
+  # a plain function call rather than a command substitution, because a
+  # subshell exiting non-zero would leave the caller running with an empty name
+  if [[ ! "$service" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    echo "invalid service name" >&2
+    exit 1
+  fi
+}
+
+reload_nginx() {
+  if command -v systemctl >/dev/null; then
+    systemctl reload nginx
+  elif command -v service >/dev/null; then
+    service nginx reload
+  else
+    nginx -s reload
+  fi
+}
+
+main() {
+  [[ "$#" -eq 2 ]] || usage
+
+  local action="$1" service="$2"
+  validate_service "$service"
+
+  local conf="/etc/nginx/conf.d/grafana-${service}.conf"
+
+  case "$action" in
+  install)
+    cat >"$conf"
+    chown root:root "$conf"
+    chmod 644 "$conf"
+
+    # checked before anything is reloaded, so a vhost that does not parse
+    # takes itself back out instead of taking nginx down with it
+    if ! nginx -t >/dev/null 2>&1; then
+      rm -f "$conf"
+      echo "the generated vhost is not valid nginx configuration" >&2
+      exit 1
+    fi
+
+    reload_nginx
+    ;;
+  remove)
+    if [[ -f "$conf" ]]; then
+      rm -f "$conf"
+      reload_nginx
+    fi
+    ;;
+  *)
+    usage
+    ;;
+  esac
+}
+
+main "$@"

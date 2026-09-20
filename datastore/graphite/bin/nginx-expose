@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Puts the service's grafana behind an nginx vhost.
+#
+# This runs on the host rather than in a container, because what it produces is
+# configuration for the host's own nginx. It runs unprivileged: it works out
+# where grafana is and what to call it, and hands the finished vhost to the
+# helper that is allowed to write under /etc.
+set -eo pipefail
+
+DOMAIN="${1:-}"
+SERVICE="${GRAPHITE_SERVICE:?the service name is passed by the definition}"
+CONTAINER="${GRAPHITE_CONTAINER:?the container name is passed by the definition}"
+HELPER="/usr/local/bin/dokku-graphite-nginx"
+
+upstream="$(docker container inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$CONTAINER" 2>/dev/null || true)"
+if [[ -z "$upstream" ]]; then
+  echo "$SERVICE has no address to proxy to, so it is not running" >&2
+  exit 1
+fi
+
+server_names=""
+if [[ -n "$DOMAIN" ]]; then
+  server_names="$DOMAIN"
+else
+  # every global vhost gets a grafana- name of its own, which is what the
+  # bash plugin did and what the printed urls promise
+  #
+  # the file is tested for rather than redirected from blindly: a missing one
+  # is an ordinary state, and the shell reports a failed redirection itself
+  # where a redirection of the reader's stderr would not catch it
+  vhost_file="${DOKKU_ROOT:-/home/dokku}/VHOST"
+  if [[ -f "$vhost_file" ]]; then
+    while read -r vhost; do
+      [[ -n "$vhost" ]] || continue
+      server_names="${server_names:+$server_names }grafana-$SERVICE.$vhost"
+    done < <(tr '[:space:]' '\n' <"$vhost_file")
+  fi
+fi
+
+if [[ -z "$server_names" ]]; then
+  echo "no domain was given and no global vhost is set, so grafana has no name to answer to" >&2
+  exit 1
+fi
+
+# nginx has variables of its own, so the ones it reads at request time are
+# escaped here and the ones this script knows are not
+sudo "$HELPER" install "$SERVICE" <<EOF
+upstream grafana-$SERVICE {
+  server $upstream:80;
+}
+
+server {
+  listen      [::]:80;
+  listen      80;
+  server_name $server_names;
+  access_log  /var/log/nginx/grafana-$SERVICE-access.log;
+  error_log   /var/log/nginx/grafana-$SERVICE-error.log;
+
+  location    / {
+    gzip             on;
+    gzip_min_length  1100;
+    gzip_buffers     4 32k;
+    gzip_types       text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml application/rss+xml font/truetype application/x-font-ttf font/opentype application/vnd.ms-fontobject image/svg+xml;
+    gzip_vary        on;
+    gzip_comp_level  6;
+
+    proxy_pass  http://grafana-$SERVICE;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host \$http_host;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$remote_addr;
+    proxy_set_header X-Forwarded-Port \$server_port;
+    proxy_set_header X-Request-Start \$msec;
+  }
+}
+EOF
+
+echo "Grafana for $SERVICE is now available under the following url(s):"
+for name in $server_names; do
+  echo "       $name"
+done
