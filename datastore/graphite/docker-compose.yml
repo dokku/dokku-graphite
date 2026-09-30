@@ -16,19 +16,23 @@ services:
       - type: bind
         source: "{{ .HostRoot }}/data/whisper"
         target: /opt/graphite/storage/whisper
+      # graphite-web's own database, with its accounts and saved graphs. Its
+      # path is fixed under the storage directory, beside everything else
+      # there, so the file is bound on its own. The pre_create hook copies the
+      # one the image ships, which already has its tables
+      - type: bind
+        source: "{{ .HostRoot }}/data/graphite-web/graphite.db"
+        target: /opt/graphite/storage/graphite.db
+        x-file: true
 
     ports:
       # where an app sends its metrics, which is what a linked app is handed.
       #
-      # statsd speaks udp, which the bash plugin has no way to say and so has
-      # always exposed as tcp. Recording it here does not fix that, and cannot:
-      # the ambassador forwards with socat over TCP4 in both of its branches,
-      # and picks what to forward by matching link variables ending in _TCP, so
-      # a udp port is not merely unforwarded but invisible to it. Exposing this
-      # port properly needs a different ambassador image, not a change here.
-      #
-      # It is recorded anyway because it is true, and because readiness now
-      # refuses to probe a udp port rather than silently connecting to one.
+      # statsd speaks udp, which the bash plugin had no way to say and so
+      # always exposed as tcp, where a statsd client off the host sends nothing.
+      # The ambassador publishes and forwards a port over the protocol recorded
+      # here, so an exposed service takes metrics over udp. Readiness refuses
+      # to probe a udp port rather than silently connecting to one.
       - name: statsd
         target: 8125
         protocol: udp
@@ -78,6 +82,20 @@ x-dokku:
       file: PASSWORD
       length: 16
       env: SERVICE_PASSWORD
+
+  hooks:
+    pre_create:
+      # the database graphite-web ships, copied out so the service keeps its
+      # own rather than one a rebuild throws away. Left alone when it is
+      # already there, since after the first time it is the service's data
+      volumes:
+        - type: bind
+          source: "{{ .HostRoot }}/data/graphite-web"
+          target: /seed
+      exec:
+        - sh
+        - -c
+        - test -f /seed/graphite.db || cp -p /opt/graphite/storage/graphite.db /seed/graphite.db
 
   # no connect, export or import: graphite is a metrics store reached over its
   # own protocols, and the image ships no client and no dump tool. Clone and
