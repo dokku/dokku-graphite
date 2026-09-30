@@ -2,12 +2,9 @@
 source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
-source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
 
-# generated from the datastore definition. do not edit: it is rewritten by
-# make generate.
 service-nginx-expose-cmd() {
-  declare desc="expose the Graphite service's grafana via an nginx vhost"
+  declare desc="expose the $PLUGIN_SERVICE service's grafana via an nginx vhost"
   local cmd="$PLUGIN_COMMAND_PREFIX:nginx-expose" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
 
