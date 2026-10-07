@@ -101,6 +101,16 @@ x-dokku:
   # own protocols, and the image ships no client and no dump tool. Clone and
   # the backup family fall out of that, which is the list the bash plugin kept
   # by hand.
+  commands:
+    # the metrics, which are every file carbon has written. Grafana's database
+    # and graphite-web's hold accounts and dashboards rather than metrics, and
+    # are kept. Offline, as carbon caches points it has not written yet and
+    # would write them back after the files were deleted, and the render api
+    # answers from that cache too; stopping the service drops both. The
+    # directory itself is kept, since it is what the volume is mounted on.
+    reset:
+      mode: offline
+      exec: ["find", '{{ index .Target "data/whisper" }}', "-mindepth", "1", "-delete"]
 
   custom_commands:
     nginx-expose:
