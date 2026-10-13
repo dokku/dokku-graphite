@@ -35,6 +35,7 @@ graphite:nginx-unexpose <service>                  # unexpose the Graphite servi
 graphite:pause <service>                           # pause a running Graphite service
 graphite:promote <service> [<app>]                 # promote service <service> as STATSD_URL in <app>
 graphite:reexpose <service>                        # reexpose a Graphite service, applying its expose settings
+graphite:reset <service> [-f|--force]              # delete all data in the Graphite service, keeping the service and its links
 graphite:restart <service>                         # graceful shutdown and restart of the Graphite service container
 graphite:set <service> <key> <value>               # set or clear a property for a service
 graphite:start <service>                           # start a previously stopped Graphite service
@@ -172,6 +173,7 @@ dokku graphite:info [<service>] [--info-flags...]
 flags:
 
 - `--backend`: show the execution backend the service was created with
+- `--backup-access-key-id-fingerprint`: show a sha256 fingerprint of the stored backup access key id
 - `--backup-auth-fingerprint`: show a sha256 fingerprint of the stored backup access key id and secret
 - `--backup-authenticated`: show whether backup credentials are stored for the service
 - `--backup-bucket`: show the bucket scheduled backups are shipped to
@@ -180,10 +182,14 @@ flags:
 - `--backup-encryption-fingerprint`: show a sha256 fingerprint of the stored backup passphrase
 - `--backup-endpoint-url`: show the s3-compatible endpoint backups are shipped to
 - `--backup-keyserver`: show the keyserver backup public keys are fetched from
+- `--backup-mailto`: show who cron mails the output of scheduled backups to in place of the global MAILTO
+- `--backup-object-name`: show the name backups are uploaded under in place of the default
 - `--backup-public-key-id`: show the gpg public key id backups are encrypted with
 - `--backup-schedule`: show the cron schedule backups run on
+- `--backup-secret-access-key-fingerprint`: show a sha256 fingerprint of the stored backup secret access key
 - `--backup-signature-version`: show the signature version backups authenticate with
 - `--backup-storage-class`: show the s3 storage class backups are uploaded with
+- `--backup-timestamp`: show whether backups are uploaded under a key ending in the time they started
 - `--backup-use-iam`: show whether scheduled backups authenticate with an instance role
 - `--config-dir`: show the service configuration directory
 - `--config-options`: show the config options the service container is run with
@@ -262,16 +268,25 @@ The properties graphite:set writes are reported under the names it takes, so a v
 dokku graphite:set lollipop initial-network my-network
 ```
 
-The stored backup credentials and passphrase are never printed. Each is reported as a lowercase hex sha256 fingerprint of the stored value, with surrounding whitespace trimmed, so a copy of the values can be compared against it:
+The stored backup credentials and passphrase are never printed. Each is reported as a lowercase hex sha256 fingerprint of that stored value, with surrounding whitespace trimmed, so a copy of one value can be compared against it:
 
 ```shell
-dokku graphite:info lollipop --backup-auth-fingerprint
+dokku graphite:info lollipop --backup-access-key-id-fingerprint
+dokku graphite:info lollipop --backup-secret-access-key-fingerprint
 dokku graphite:info lollipop --backup-encryption-fingerprint
 ```
 
-The same fingerprints can be computed from the values that were passed to backup-auth and backup-set-encryption:
+A fingerprint is empty when that value is not stored. The access key id and the secret are also reported as one fingerprint of the pair, which is empty until both are stored and is what backup-auth writes in one call:
+
+```shell
+dokku graphite:info lollipop --backup-auth-fingerprint
+```
+
+The same fingerprints can be computed from the values that were passed to set, backup-auth and backup-set-encryption:
 
 ```
+printf '%s' "$AWS_ACCESS_KEY_ID" | sha256sum
+printf '%s' "$AWS_SECRET_ACCESS_KEY" | sha256sum
 printf '%s\n%s' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | sha256sum
 printf '%s' "$PASSPHRASE" | sha256sum
 ```
@@ -458,22 +473,34 @@ Unset the post-create-network value:
 dokku graphite:set lollipop post-create-network
 ```
 
-Set the keyserver a public key for backup encryption is fetched from:
+Limit the container to 512 megabytes of memory, or go back to no limit with 0:
 
 ```shell
-dokku graphite:set lollipop backup-keyserver hkp://keys.example.com
+dokku graphite:set lollipop memory 512
 ```
 
-Set the s3 storage class backups are uploaded with, one of `STANDARD,` `REDUCED_REDUNDANCY,` `STANDARD_IA,` `ONEZONE_IA,` `INTELLIGENT_TIERING,` `GLACIER,` `DEEP_ARCHIVE` or `GLACIER_IR`:
+Give the container a shared memory size of its own:
 
 ```shell
-dokku graphite:set lollipop backup-storage-class STANDARD_IA
+dokku graphite:set lollipop shm-size 256m
 ```
 
-Go back to uploading backups with the bucket's default storage class:
+Start the container with semi-colon delimited environment variables of your own:
 
 ```shell
-dokku graphite:set lollipop backup-storage-class
+dokku graphite:set lollipop custom-env "TZ=UTC;LANG=C.UTF-8"
+```
+
+Pass extra arguments to the process the service container runs. These are not docker flags, so use mount for mounts. The value follows -- so that its leading dash is not read as a flag:
+
+```shell
+dokku graphite:set lollipop config-options -- "<config-options...>"
+```
+
+Go back to running the process with the datastore's own arguments alone:
+
+```shell
+dokku graphite:set lollipop config-options
 ```
 
 Cap the container log at a size of your own rather than the one it inherits:
@@ -572,7 +599,7 @@ Go back to mounting every volume where the definition does:
 dokku graphite:set lollipop volume-targets
 ```
 
-> NOTE: a log setting, a restart policy or a volume target reaches the container the next time one is built. graphite:restart keeps the container it has, so use graphite:stop and then graphite:start on a service that is already running.
+> NOTE: a network, a log setting, a restart policy, a volume target, the config options, the custom environment, the memory limit or the shared memory size reaches the container the next time one is built, and set warns that it does. graphite:restart keeps the container it has, so use graphite:stop and then graphite:start on a service that is already running.
 > NOTE: a port-bind-address or port-source-range reaches an exposed service with graphite:reexpose, which replaces the container publishing its ports and leaves the service container running.
 > NOTE: an expose-mode, or a port-bind-address for a service exposed directly, reaches an exposed service with graphite:reexpose, which stops and starts a running service after asking. It also reaches the service the next time it is restarted, or stopped and started.
 
@@ -883,10 +910,11 @@ flags:
 - `--log-driver <string>`: the docker logging driver to run the service container with (default: the daemon's own)
 - `--log-opt <strings>`: a comma-separated list of key=value docker log options for the service container
 - `-m|--memory <int>`: container memory limit in megabytes, 0 for unlimited
+- `--no-migrate`: place the service on the --definition named with its data left where it is, for a service whose data that definition already reads
 - `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
-- `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade
+- `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade, required for one that migrates the data
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -980,6 +1008,33 @@ dokku graphite:links lollipop
 
 Renaming an app moves its link onto the new name, and cloning an app links the clone as well as the original.
 
+### Data Management
+
+The underlying service data can be imported and exported with the following commands:
+
+### delete all data in the Graphite service, keeping the service and its links
+
+```shell
+# usage
+dokku graphite:reset <service> [-f|--force]
+```
+
+flags:
+
+- `-f|--force`: reset the service without asking for its name first
+
+Delete all data in the service, leaving it as empty as a newly created one. The service, its credentials, and the apps it is linked to are kept, so linked apps do not need to be relinked. Connections the apps hold open may be closed.
+
+```shell
+dokku graphite:reset lollipop
+```
+
+The service name is asked for before anything is deleted, unless --force is given:
+
+```shell
+dokku graphite:reset lollipop --force
+```
+
 ### Custom Commands
 
 This datastore adds the following commands of its own:
@@ -1012,6 +1067,29 @@ Unexpose the Graphite service's grafana:
 ```shell
 dokku graphite:nginx-unexpose lollipop
 ```
+
+### Service properties
+
+Every setting a service has after it is created, other than its image, its passwords, its mounts and its backup schedule, each of which has a command of its own, is changed with `dokku graphite:set lollipop <key> <value>`, and cleared by giving no value. `dokku graphite:info lollipop` reports each of them, with a credential reported as a fingerprint rather than its value. A setting the container is made with only reaches it once the container is built again, and `set` warns when that is the case: `dokku graphite:restart` keeps the container the service has, so use `dokku graphite:stop` and then `dokku graphite:start`.
+
+| Property | Description | Takes effect |
+| --- | --- | --- |
+| `initial-network` | the network the service container is attached to when it is made | after `graphite:stop` and `graphite:start` |
+| `post-create-network` | a comma-separated list of networks the container is attached to once it is made | after `graphite:stop` and `graphite:start` |
+| `post-start-network` | a comma-separated list of networks the container is attached to once it is started | after `graphite:stop` and `graphite:start` |
+| `log-driver` | the docker logging driver the container is run with | after `graphite:stop` and `graphite:start` |
+| `log-opt` | a comma-separated list of docker log options the container is run with | after `graphite:stop` and `graphite:start` |
+| `restart-policy` | the docker restart policy the container is run with | after `graphite:stop` and `graphite:start` |
+| `wait-timeout` | the seconds the service is waited on to become ready | immediately |
+| `port-bind-address` | the address exposed ports without one of their own are published on | after `graphite:reexpose` |
+| `port-source-range` | the only IP address or CIDR the exposed ports accept clients from | after `graphite:reexpose` |
+| `expose-host` | the host the exposed dsn names | immediately |
+| `expose-mode` | `direct` to publish the exposed ports on the service container rather than through an ambassador | after `graphite:reexpose` |
+| `volume-targets` | the container paths the definition's volumes are mounted at in place of its own | after `graphite:stop` and `graphite:start` |
+| `config-options` | extra arguments for the process the service container runs | after `graphite:stop` and `graphite:start` |
+| `custom-env` | semicolon-delimited environment variables the container is run with | after `graphite:stop` and `graphite:start` |
+| `memory` | the container memory limit in megabytes, `0` for no limit | after `graphite:stop` and `graphite:start` |
+| `shm-size` | the shared memory size of the container, such as `64m` | after `graphite:stop` and `graphite:start` |
 
 ### Limiting where and to whom a service is exposed
 
