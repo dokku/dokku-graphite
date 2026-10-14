@@ -492,6 +492,36 @@ Go back to running the process with the datastore's own arguments alone:
 dokku graphite:set lollipop config-options
 ```
 
+Upload backups under a name of your own rather than graphite-lollipop:
+
+```shell
+dokku graphite:set lollipop backup-object-name db/latest
+```
+
+Upload every backup to the same key, without a timestamp, so bucket versioning and lifecycle rules can keep and rotate them:
+
+```shell
+dokku graphite:set lollipop backup-timestamp false
+```
+
+Go back to timestamped backups:
+
+```shell
+dokku graphite:set lollipop backup-timestamp
+```
+
+Mail the output of scheduled backups to a comma-separated list of email addresses or local users rather than to the global cron `MAILTO`. Requires a dokku version that reads json entries from the cron-entries plugin trigger, and a mail transfer agent on the host:
+
+```shell
+dokku graphite:set lollipop backup-mailto ops@example.com,dba@example.com
+```
+
+Go back to mailing scheduled backup output to the global cron `MAILTO`:
+
+```shell
+dokku graphite:set lollipop backup-mailto
+```
+
 Cap the container log at a size of your own rather than the one it inherits:
 
 ```shell
