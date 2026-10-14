@@ -462,22 +462,34 @@ Unset the post-create-network value:
 dokku graphite:set lollipop post-create-network
 ```
 
-Set the keyserver a public key for backup encryption is fetched from:
+Limit the container to 512 megabytes of memory, or go back to no limit with 0:
 
 ```shell
-dokku graphite:set lollipop backup-keyserver hkp://keys.example.com
+dokku graphite:set lollipop memory 512
 ```
 
-Set the s3 storage class backups are uploaded with, one of `STANDARD,` `REDUCED_REDUNDANCY,` `STANDARD_IA,` `ONEZONE_IA,` `INTELLIGENT_TIERING,` `GLACIER,` `DEEP_ARCHIVE` or `GLACIER_IR`:
+Give the container a shared memory size of its own:
 
 ```shell
-dokku graphite:set lollipop backup-storage-class STANDARD_IA
+dokku graphite:set lollipop shm-size 256m
 ```
 
-Go back to uploading backups with the bucket's default storage class:
+Start the container with semi-colon delimited environment variables of your own:
 
 ```shell
-dokku graphite:set lollipop backup-storage-class
+dokku graphite:set lollipop custom-env "TZ=UTC;LANG=C.UTF-8"
+```
+
+Pass extra arguments to the process the service container runs. These are not docker flags, so use mount for mounts. The value follows -- so that its leading dash is not read as a flag:
+
+```shell
+dokku graphite:set lollipop config-options -- "<config-options...>"
+```
+
+Go back to running the process with the datastore's own arguments alone:
+
+```shell
+dokku graphite:set lollipop config-options
 ```
 
 Upload backups under a name of your own rather than graphite-lollipop:
@@ -606,7 +618,7 @@ Go back to mounting every volume where the definition does:
 dokku graphite:set lollipop volume-targets
 ```
 
-> NOTE: a log setting, a restart policy or a volume target reaches the container the next time one is built. graphite:restart keeps the container it has, so use graphite:stop and then graphite:start on a service that is already running.
+> NOTE: a network, a log setting, a restart policy, a volume target, the config options, the custom environment, the memory limit or the shared memory size reaches the container the next time one is built, and set warns that it does. graphite:restart keeps the container it has, so use graphite:stop and then graphite:start on a service that is already running.
 > NOTE: a port-bind-address or port-source-range reaches an exposed service with graphite:reexpose, which replaces the container publishing its ports and leaves the service container running.
 > NOTE: an expose-mode, or a port-bind-address for a service exposed directly, reaches an exposed service with graphite:reexpose, which stops and starts a running service after asking. It also reaches the service the next time it is restarted, or stopped and started.
 
@@ -917,6 +929,7 @@ flags:
 - `--log-driver <string>`: the docker logging driver to run the service container with (default: the daemon's own)
 - `--log-opt <strings>`: a comma-separated list of key=value docker log options for the service container
 - `-m|--memory <int>`: container memory limit in megabytes, 0 for unlimited
+- `--no-migrate`: place the service on the --definition named with its data left where it is, for a service whose data that definition already reads
 - `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
@@ -1073,6 +1086,29 @@ Unexpose the Graphite service's grafana:
 ```shell
 dokku graphite:nginx-unexpose lollipop
 ```
+
+### Service properties
+
+Every setting a service has after it is created, other than its image, its passwords, its mounts and its backup schedule, each of which has a command of its own, is changed with `dokku graphite:set lollipop <key> <value>`, and cleared by giving no value. `dokku graphite:info lollipop` reports each of them, with a credential reported as a fingerprint rather than its value. A setting the container is made with only reaches it once the container is built again, and `set` warns when that is the case: `dokku graphite:restart` keeps the container the service has, so use `dokku graphite:stop` and then `dokku graphite:start`.
+
+| Property | Description | Takes effect |
+| --- | --- | --- |
+| `initial-network` | the network the service container is attached to when it is made | after `graphite:stop` and `graphite:start` |
+| `post-create-network` | a comma-separated list of networks the container is attached to once it is made | after `graphite:stop` and `graphite:start` |
+| `post-start-network` | a comma-separated list of networks the container is attached to once it is started | after `graphite:stop` and `graphite:start` |
+| `log-driver` | the docker logging driver the container is run with | after `graphite:stop` and `graphite:start` |
+| `log-opt` | a comma-separated list of docker log options the container is run with | after `graphite:stop` and `graphite:start` |
+| `restart-policy` | the docker restart policy the container is run with | after `graphite:stop` and `graphite:start` |
+| `wait-timeout` | the seconds the service is waited on to become ready | immediately |
+| `port-bind-address` | the address exposed ports without one of their own are published on | after `graphite:reexpose` |
+| `port-source-range` | the only IP address or CIDR the exposed ports accept clients from | after `graphite:reexpose` |
+| `expose-host` | the host the exposed dsn names | immediately |
+| `expose-mode` | `direct` to publish the exposed ports on the service container rather than through an ambassador | after `graphite:reexpose` |
+| `volume-targets` | the container paths the definition's volumes are mounted at in place of its own | after `graphite:stop` and `graphite:start` |
+| `config-options` | extra arguments for the process the service container runs | after `graphite:stop` and `graphite:start` |
+| `custom-env` | semicolon-delimited environment variables the container is run with | after `graphite:stop` and `graphite:start` |
+| `memory` | the container memory limit in megabytes, `0` for no limit | after `graphite:stop` and `graphite:start` |
+| `shm-size` | the shared memory size of the container, such as `64m` | after `graphite:stop` and `graphite:start` |
 
 ### Limiting where and to whom a service is exposed
 
