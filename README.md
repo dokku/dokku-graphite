@@ -173,6 +173,7 @@ dokku graphite:info [<service>] [--info-flags...]
 flags:
 
 - `--backend`: show the execution backend the service was created with
+- `--backup-access-key-id-fingerprint`: show a sha256 fingerprint of the stored backup access key id
 - `--backup-auth-fingerprint`: show a sha256 fingerprint of the stored backup access key id and secret
 - `--backup-authenticated`: show whether backup credentials are stored for the service
 - `--backup-bucket`: show the bucket scheduled backups are shipped to
@@ -185,6 +186,7 @@ flags:
 - `--backup-object-name`: show the name backups are uploaded under in place of the default
 - `--backup-public-key-id`: show the gpg public key id backups are encrypted with
 - `--backup-schedule`: show the cron schedule backups run on
+- `--backup-secret-access-key-fingerprint`: show a sha256 fingerprint of the stored backup secret access key
 - `--backup-signature-version`: show the signature version backups authenticate with
 - `--backup-storage-class`: show the s3 storage class backups are uploaded with
 - `--backup-timestamp`: show whether backups are uploaded under a key ending in the time they started
@@ -266,16 +268,25 @@ The properties graphite:set writes are reported under the names it takes, so a v
 dokku graphite:set lollipop initial-network my-network
 ```
 
-The stored backup credentials and passphrase are never printed. Each is reported as a lowercase hex sha256 fingerprint of the stored value, with surrounding whitespace trimmed, so a copy of the values can be compared against it:
+The stored backup credentials and passphrase are never printed. Each is reported as a lowercase hex sha256 fingerprint of that stored value, with surrounding whitespace trimmed, so a copy of one value can be compared against it:
 
 ```shell
-dokku graphite:info lollipop --backup-auth-fingerprint
+dokku graphite:info lollipop --backup-access-key-id-fingerprint
+dokku graphite:info lollipop --backup-secret-access-key-fingerprint
 dokku graphite:info lollipop --backup-encryption-fingerprint
 ```
 
-The same fingerprints can be computed from the values that were passed to backup-auth and backup-set-encryption:
+A fingerprint is empty when that value is not stored. The access key id and the secret are also reported as one fingerprint of the pair, which is empty until both are stored and is what backup-auth writes in one call:
+
+```shell
+dokku graphite:info lollipop --backup-auth-fingerprint
+```
+
+The same fingerprints can be computed from the values that were passed to set, backup-auth and backup-set-encryption:
 
 ```
+printf '%s' "$AWS_ACCESS_KEY_ID" | sha256sum
+printf '%s' "$AWS_SECRET_ACCESS_KEY" | sha256sum
 printf '%s\n%s' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | sha256sum
 printf '%s' "$PASSPHRASE" | sha256sum
 ```
@@ -490,36 +501,6 @@ Go back to running the process with the datastore's own arguments alone:
 
 ```shell
 dokku graphite:set lollipop config-options
-```
-
-Upload backups under a name of your own rather than graphite-lollipop:
-
-```shell
-dokku graphite:set lollipop backup-object-name db/latest
-```
-
-Upload every backup to the same key, without a timestamp, so bucket versioning and lifecycle rules can keep and rotate them:
-
-```shell
-dokku graphite:set lollipop backup-timestamp false
-```
-
-Go back to timestamped backups:
-
-```shell
-dokku graphite:set lollipop backup-timestamp
-```
-
-Mail the output of scheduled backups to a comma-separated list of email addresses or local users rather than to the global cron `MAILTO`. Requires a dokku version that reads json entries from the cron-entries plugin trigger, and a mail transfer agent on the host:
-
-```shell
-dokku graphite:set lollipop backup-mailto ops@example.com,dba@example.com
-```
-
-Go back to mailing scheduled backup output to the global cron `MAILTO`:
-
-```shell
-dokku graphite:set lollipop backup-mailto
 ```
 
 Cap the container log at a size of your own rather than the one it inherits:
