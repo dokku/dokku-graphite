@@ -4,9 +4,10 @@ services:
     image: "{{ .Image }}:{{ .ImageVersion }}"
 
     environment:
-      # the grafana account's password. The bash plugin passes this too, but
-      # reads it from a variable it never assigns, so every service it creates
-      # starts with an empty one.
+      # the service password. The bash plugin passes this too, but reads it
+      # from a variable it never assigns, so every service it creates starts
+      # with an empty one. Nothing in the image reads it today: grafana keeps
+      # the admin account its own config names.
       GRAPHITE_PASSWORD: "{{ .Secret.password }}"
 
     volumes:
@@ -82,6 +83,10 @@ x-dokku:
       file: PASSWORD
       length: 16
       env: SERVICE_PASSWORD
+
+      # only ever handed to the container as GRAPHITE_PASSWORD, which nothing
+      # in the image reads, so a new password is a container made again
+      rebuild: true
 
   hooks:
     pre_create:
