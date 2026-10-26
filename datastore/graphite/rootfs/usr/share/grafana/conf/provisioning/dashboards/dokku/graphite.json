@@ -1,0 +1,522 @@
+{
+  "uid": "dokku-graphite",
+  "title": "Graphite",
+  "description": "The health of the service's carbon and statsd, which have data as soon as the service is up",
+  "tags": [
+    "dokku",
+    "graphite"
+  ],
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "graphite",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Carbon",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Points received and committed",
+      "description": "Points carbon was sent and points it wrote to disk, per minute",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.metricsReceived), 'received')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.committedPoints), 'committed')"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Cache",
+      "description": "Points carbon holds in memory before writing them, and the metrics they belong to",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.cache.size), 'points')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.cache.queues), 'metrics')"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Creates and errors",
+      "description": "Metric files carbon created, creates it dropped, and errors it hit, per minute",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.creates), 'creates')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.droppedCreates), 'dropped creates')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.errors), 'errors')"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "CPU",
+      "description": "CPU carbon uses",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.cpuUsage), 'cpu')"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Memory",
+      "description": "Memory carbon uses",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(sumSeries(carbon.agents.*.memUsage), 'memory')"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "StatsD",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "panels": []
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Received",
+      "description": "Packets and metrics statsd received, and lines it could not parse, per second",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(stats.counters.statsd.packets_received.rate, 'packets')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(stats.counters.statsd.metrics_received.rate, 'metrics')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(stats.counters.statsd.bad_lines_seen.rate, 'bad lines')"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Metrics flushed",
+      "description": "Metrics statsd sent to carbon at each flush",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(stats.statsd.numStats, 'metrics')"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Flush timing",
+      "description": "How long statsd took to process and send each flush",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(stats.statsd.processing_time, 'processing')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "alias(stats.statsd.graphiteStats.flush_time, 'flush')"
+        }
+      ]
+    }
+  ]
+}

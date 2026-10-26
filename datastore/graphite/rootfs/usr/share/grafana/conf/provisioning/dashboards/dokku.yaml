@@ -1,0 +1,19 @@
+---
+# the dashboards every graphite service starts with, read from beside this file
+# by the grafana the image runs. The image ships dashboards of its own, but
+# nothing loads them, and they graph metrics nothing in a dokku install sends.
+#
+# They are mounted read only and written again each time the container is
+# made, so a change made to one in grafana could not be kept: grafana is told
+# to refuse it rather than appear to save it. A copy saved under another name
+# is the operator's own, kept in grafana's database with the rest.
+apiVersion: 1
+
+providers:
+  - name: dokku
+    folder: Dokku
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /usr/share/grafana/conf/provisioning/dashboards/dokku
