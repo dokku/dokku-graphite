@@ -25,6 +25,12 @@ services:
         source: "{{ .HostRoot }}/data/graphite-web/graphite.db"
         target: /opt/graphite/storage/graphite.db
         x-file: true
+      # carbon's own configuration, which is where its storage schemas and
+      # aggregation are set. The pre_create hook copies the files the image
+      # ships here before the mount hides them
+      - type: bind
+        source: "{{ .HostRoot }}/config"
+        target: /opt/graphite/conf
 
     ports:
       # where an app sends its metrics, which is what a linked app is handed.
@@ -92,15 +98,56 @@ x-dokku:
     pre_create:
       # the database graphite-web ships, copied out so the service keeps its
       # own rather than one a rebuild throws away. Left alone when it is
-      # already there, since after the first time it is the service's data
+      # already there, since after the first time it is the service's data.
+      #
+      # carbon's configuration as well, copied from where the image keeps it,
+      # which the service's mount does not hide here since the hook runs in a
+      # container of its own without the service's volumes
       volumes:
         - type: bind
           source: "{{ .HostRoot }}/data/graphite-web"
           target: /seed
+        - type: bind
+          source: "{{ .HostRoot }}/config"
+          target: /seed-config
       exec:
         - sh
         - -c
-        - test -f /seed/graphite.db || cp -p /opt/graphite/storage/graphite.db /seed/graphite.db
+        # -n so that an operator's edits are never overwritten: the files are
+        # theirs once they exist
+        - >-
+          (test -f /seed/graphite.db || cp -p /opt/graphite/storage/graphite.db /seed/graphite.db) &&
+          cp -n /opt/graphite/conf/* /seed-config/
+
+  documentation:
+    - title: Configuring carbon
+      body: |
+        carbon's configuration is kept in '/var/lib/dokku/services/grafana-graphite-statsd/lollipop/config', which is mounted at '/opt/graphite/conf' in the container.
+        the files the image ships there are copied in when the service is created, and a file already there is never overwritten, so edits are kept when the service is rebuilt or upgraded.
+        the copies are owned by root, so edit them as root, and restart the service for carbon to read them:
+            sudo editor /var/lib/dokku/services/grafana-graphite-statsd/lollipop/config/storage-schemas.conf
+        dokku {{.CommandPrefix}}:restart lollipop
+        carbon applies 'storage-schemas.conf' and 'storage-aggregation.conf' when it creates the file for a metric, so a metric it already has a file for keeps the retention it was created with.
+        a service created before its configuration was mounted has the files it does not already have copied in the next time its container is made, and keeps any file placed there before.
+        the container is kept by a restart, so stop and start the service instead:
+        dokku {{.CommandPrefix}}:stop lollipop
+        dokku {{.CommandPrefix}}:start lollipop
+    - title: Dashboards
+      body: |
+        grafana starts with two dashboards in its 'Dokku' folder, which is reached once grafana is exposed and logged in to with grafana's own admin account:
+        dokku {{.CommandPrefix}}:nginx-expose lollipop
+        the 'Graphite' dashboard shows carbon and statsd themselves, which have data as soon as the service is up.
+        the 'StatsD' dashboard shows the counters, timers and gauges apps send to statsd, at the 'STATSD_URL' a linked app is handed:
+        dokku {{.CommandPrefix}}:link lollipop playground
+        its 'namespace' picker lists the first part of each metric's name, so an app that prefixes every metric it sends with its own name, such as 'playground.requests', can be picked out from the rest.
+        the dashboards are written again each time the container is made, so grafana refuses to save a change to one. Save a copy under another name to change it, which is kept with grafana's other dashboards.
+        metrics about the host itself need a collector running there that writes carbon's line protocol, which carbon takes on its port once the service is exposed:
+        dokku {{.CommandPrefix}}:expose lollipop 8125 8126 8080 8081 2003
+        a service made before the dashboards were shipped has them the next time its container is made. The container is kept by a restart, so stop and start the service instead:
+        dokku {{.CommandPrefix}}:stop lollipop
+        dokku {{.CommandPrefix}}:start lollipop
+        a service still on grafana 6 has them once it is upgraded:
+        dokku {{.CommandPrefix}}:upgrade lollipop
 
   # no connect, export or import: graphite is a metrics store reached over its
   # own protocols, and the image ships no client and no dump tool. Clone and

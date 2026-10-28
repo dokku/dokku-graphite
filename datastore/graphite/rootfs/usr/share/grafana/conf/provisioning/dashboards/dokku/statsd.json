@@ -1,0 +1,433 @@
+{
+  "uid": "dokku-statsd",
+  "title": "StatsD",
+  "description": "Metrics apps send to statsd, grouped by the first part of their name",
+  "tags": [
+    "dokku",
+    "graphite",
+    "statsd"
+  ],
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "graphite",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": []
+      },
+      {
+        "name": "namespace",
+        "label": "Namespace",
+        "type": "query",
+        "datasource": {
+          "type": "graphite",
+          "uid": "${datasource}"
+        },
+        "query": {
+          "queryType": "Default",
+          "refId": "namespace",
+          "target": "stats.{counters,timers,gauges}.*"
+        },
+        "definition": "stats.{counters,timers,gauges}.*",
+        "regex": "/^(?!statsd$)/",
+        "multi": true,
+        "includeAll": true,
+        "current": {},
+        "hide": 0,
+        "refresh": 2,
+        "sort": 1,
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Counters",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Counter rate",
+      "description": "Each counter's count per second",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.counters.$namespace.rate, '^stats\\.counters\\.(.+)\\.rate$', '\\1')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.counters.$namespace.*.rate, '^stats\\.counters\\.(.+)\\.rate$', '\\1')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.counters.$namespace.*.*.rate, '^stats\\.counters\\.(.+)\\.rate$', '\\1')"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "row",
+      "title": "Timers",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "panels": []
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Timer mean",
+      "description": "Each timer's mean duration",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.mean, '^stats\\.timers\\.(.+)\\.mean$', '\\1')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.*.mean, '^stats\\.timers\\.(.+)\\.mean$', '\\1')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.*.*.mean, '^stats\\.timers\\.(.+)\\.mean$', '\\1')"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Timer 90th percentile",
+      "description": "The longest duration among each timer's fastest 90 percent",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.upper_90, '^stats\\.timers\\.(.+)\\.upper_90$', '\\1')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.*.upper_90, '^stats\\.timers\\.(.+)\\.upper_90$', '\\1')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.*.*.upper_90, '^stats\\.timers\\.(.+)\\.upper_90$', '\\1')"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Timer calls",
+      "description": "Each timer's calls per second",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.count_ps, '^stats\\.timers\\.(.+)\\.count_ps$', '\\1')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.*.count_ps, '^stats\\.timers\\.(.+)\\.count_ps$', '\\1')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.timers.$namespace.*.*.count_ps, '^stats\\.timers\\.(.+)\\.count_ps$', '\\1')"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Gauges",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "panels": []
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Gauges",
+      "description": "Each gauge's value",
+      "datasource": {
+        "type": "graphite",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": true,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.gauges.$namespace, '^stats\\.gauges\\.(.+)$', '\\1')"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.gauges.$namespace.*, '^stats\\.gauges\\.(.+)$', '\\1')"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "graphite",
+            "uid": "${datasource}"
+          },
+          "target": "aliasSub(stats.gauges.$namespace.*.*, '^stats\\.gauges\\.(.+)$', '\\1')"
+        }
+      ]
+    }
+  ]
+}

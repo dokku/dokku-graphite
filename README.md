@@ -1,6 +1,6 @@
 # dokku graphite [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-graphite/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-graphite/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official graphite plugin for dokku. Currently defaults to installing [dokku/docker-grafana-graphite 6.4.4](https://hub.docker.com/r/dokku/docker-grafana-graphite/).
+Official graphite plugin for dokku. Currently defaults to installing [dokku/docker-grafana-graphite 13.2.4](https://hub.docker.com/r/dokku/docker-grafana-graphite/).
 
 ## Requirements
 
@@ -75,6 +75,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-r|--root-password <string>`: override the root-level service password, for datastores that have one
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap, for datastores that support it (default: the datastore's own)
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -90,7 +91,7 @@ You can also specify the image and image version to use for the service. It *mus
 
 ```shell
 export STATSD_IMAGE="dokku/docker-grafana-graphite"
-export STATSD_IMAGE_VERSION="6.4.4"
+export STATSD_IMAGE_VERSION="13.2.4"
 dokku graphite:create lollipop
 ```
 
@@ -223,6 +224,7 @@ flags:
 - `--restart-policy`: show the restart policy the service container is run with
 - `--root-password-fingerprint`: show a sha256 fingerprint of the service root password
 - `--service`: show the name of the service
+- `--service-memory`: show the memory in megabytes the datastore itself is told to use
 - `--service-root`: show the service root directory
 - `--shm-size`: show the shared memory size the service container is run with
 - `--status`: show the service running status
@@ -615,7 +617,7 @@ Go back to publishing the exposed ports through an ambassador container:
 dokku graphite:set lollipop expose-mode
 ```
 
-Mount one of the definition's volumes at another path in the container, for an image that keeps its data somewhere else. Each volume is named by where it lives in the service directory (data/grafana, data/whisper, data/graphite-web/graphite.db), and several are separated by spaces:
+Mount one of the definition's volumes at another path in the container, for an image that keeps its data somewhere else. Each volume is named by where it lives in the service directory (data/grafana, data/whisper, data/graphite-web/graphite.db, config), and several are separated by spaces:
 
 ```shell
 dokku graphite:set lollipop volume-targets data/grafana=/srv/graphite
@@ -943,6 +945,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade, required for one that migrates the data
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap, empty for the datastore's own
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -1155,8 +1158,61 @@ Each volume a service mounts is named by the directory it lives in under the ser
 | graphite | data/grafana | `/opt/grafana/data` |
 | graphite | data/whisper | `/opt/graphite/storage/whisper` |
 | graphite | data/graphite-web/graphite.db | `/opt/graphite/storage/graphite.db` |
+| graphite | config | `/opt/graphite/conf` |
 
 Moving a volume changes where it is mounted, not where the image reads and writes. The datastore's own commands and the paths it is started with follow the volume, but an image that keeps writing to its own path writes into the container rather than into the volume, and what it writes is lost when the container is rebuilt, so only move a volume to where the image expects its data. The data stays in the same directory on the host, and a move reaches the container the next time one is built, so use `dokku graphite:stop` and then `dokku graphite:start` on a running service. An upgrade onto a definition that does not mount a volume the service moved is refused until the move is cleared or replaced.
+
+### Configuring carbon
+
+Carbon's configuration is kept in `/var/lib/dokku/services/grafana-graphite-statsd/lollipop/config`, which is mounted at `/opt/graphite/conf` in the container. The files the image ships there are copied in when the service is created, and a file already there is never overwritten, so edits are kept when the service is rebuilt or upgraded. The copies are owned by root, so edit them as root, and restart the service for carbon to read them:
+
+```
+sudo editor /var/lib/dokku/services/grafana-graphite-statsd/lollipop/config/storage-schemas.conf
+```
+
+```shell
+dokku graphite:restart lollipop
+```
+
+Carbon applies `storage-schemas.conf` and `storage-aggregation.conf` when it creates the file for a metric, so a metric it already has a file for keeps the retention it was created with. A service created before its configuration was mounted has the files it does not already have copied in the next time its container is made, and keeps any file placed there before. The container is kept by a restart, so stop and start the service instead:
+
+```shell
+dokku graphite:stop lollipop
+dokku graphite:start lollipop
+```
+
+### Dashboards
+
+Grafana starts with two dashboards in its `Dokku` folder, which is reached once grafana is exposed and logged in to with grafana's own admin account:
+
+```shell
+dokku graphite:nginx-expose lollipop
+```
+
+The `Graphite` dashboard shows carbon and statsd themselves, which have data as soon as the service is up. The `StatsD` dashboard shows the counters, timers and gauges apps send to statsd, at the `STATSD_URL` a linked app is handed:
+
+```shell
+dokku graphite:link lollipop playground
+```
+
+Its `namespace` picker lists the first part of each metric's name, so an app that prefixes every metric it sends with its own name, such as `playground.requests`, can be picked out from the rest. The dashboards are written again each time the container is made, so grafana refuses to save a change to one. Save a copy under another name to change it, which is kept with grafana's other dashboards. Metrics about the host itself need a collector running there that writes carbon's line protocol, which carbon takes on its port once the service is exposed:
+
+```shell
+dokku graphite:expose lollipop 8125 8126 8080 8081 2003
+```
+
+A service made before the dashboards were shipped has them the next time its container is made. The container is kept by a restart, so stop and start the service instead:
+
+```shell
+dokku graphite:stop lollipop
+dokku graphite:start lollipop
+```
+
+A service still on grafana 6 has them once it is upgraded:
+
+```shell
+dokku graphite:upgrade lollipop
+```
 
 ### Disabling `docker image pull` calls
 
