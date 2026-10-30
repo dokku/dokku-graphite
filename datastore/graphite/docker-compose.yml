@@ -126,28 +126,28 @@ x-dokku:
         the files the image ships there are copied in when the service is created, and a file already there is never overwritten, so edits are kept when the service is rebuilt or upgraded.
         the copies are owned by root, so edit them as root, and restart the service for carbon to read them:
             sudo editor /var/lib/dokku/services/grafana-graphite-statsd/lollipop/config/storage-schemas.conf
-        dokku {{.CommandPrefix}}:restart lollipop
+        dokku {{.Command "restart"}} lollipop
         carbon applies 'storage-schemas.conf' and 'storage-aggregation.conf' when it creates the file for a metric, so a metric it already has a file for keeps the retention it was created with.
         a service created before its configuration was mounted has the files it does not already have copied in the next time its container is made, and keeps any file placed there before.
         the container is kept by a restart, so stop and start the service instead:
-        dokku {{.CommandPrefix}}:stop lollipop
-        dokku {{.CommandPrefix}}:start lollipop
+        dokku {{.Command "stop"}} lollipop
+        dokku {{.Command "start"}} lollipop
     - title: Dashboards
       body: |
         grafana starts with two dashboards in its 'Dokku' folder, which is reached once grafana is exposed and logged in to with grafana's own admin account:
-        dokku {{.CommandPrefix}}:nginx-expose lollipop
+        dokku {{.Command "nginx-expose"}} lollipop
         the 'Graphite' dashboard shows carbon and statsd themselves, which have data as soon as the service is up.
         the 'StatsD' dashboard shows the counters, timers and gauges apps send to statsd, at the 'STATSD_URL' a linked app is handed:
-        dokku {{.CommandPrefix}}:link lollipop playground
+        dokku {{.Command "link"}} lollipop playground
         its 'namespace' picker lists the first part of each metric's name, so an app that prefixes every metric it sends with its own name, such as 'playground.requests', can be picked out from the rest.
         the dashboards are written again each time the container is made, so grafana refuses to save a change to one. Save a copy under another name to change it, which is kept with grafana's other dashboards.
         metrics about the host itself need a collector running there that writes carbon's line protocol, which carbon takes on its port once the service is exposed:
-        dokku {{.CommandPrefix}}:expose lollipop 8125 8126 8080 8081 2003
+        dokku {{.Command "expose"}} lollipop 8125 8126 8080 8081 2003
         a service made before the dashboards were shipped has them the next time its container is made. The container is kept by a restart, so stop and start the service instead:
-        dokku {{.CommandPrefix}}:stop lollipop
-        dokku {{.CommandPrefix}}:start lollipop
+        dokku {{.Command "stop"}} lollipop
+        dokku {{.Command "start"}} lollipop
         a service still on grafana 6 has them once it is upgraded:
-        dokku {{.CommandPrefix}}:upgrade lollipop
+        dokku {{.Command "upgrade"}} lollipop
 
   # no connect, export or import: graphite is a metrics store reached over its
   # own protocols, and the image ships no client and no dump tool. Clone and
@@ -174,8 +174,8 @@ x-dokku:
       documentation: |
         expose the {{.Title}} service's grafana via an nginx vhost
         > NOTE: with no domain, grafana answers to grafana-<service>.<vhost> for every global vhost
-        dokku {{.CommandPrefix}}:nginx-expose lollipop
-        dokku {{.CommandPrefix}}:nginx-expose lollipop example.com
+        dokku {{.Command "nginx-expose"}} lollipop
+        dokku {{.Command "nginx-expose"}} lollipop example.com
       arguments:
         - name: domain
           description: a domain to expose grafana on, defaulting to the global vhosts
@@ -194,7 +194,7 @@ x-dokku:
       description: unexpose the {{.Title}} service's grafana
       documentation: |
         unexpose the {{.Title}} service's grafana
-        dokku {{.CommandPrefix}}:nginx-unexpose lollipop
+        dokku {{.Command "nginx-unexpose"}} lollipop
       exec:
         - nginx-unexpose
       env:
