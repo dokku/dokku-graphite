@@ -1,1 +1,1 @@
-FROM dokku/docker-grafana-graphite:13.2.4
+FROM dokku/docker-grafana-graphite:13.2.6
