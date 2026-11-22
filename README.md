@@ -1,6 +1,6 @@
 # dokku graphite [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-graphite/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-graphite/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official graphite plugin for dokku. Currently defaults to installing [dokku/docker-grafana-graphite 13.2.6](https://hub.docker.com/r/dokku/docker-grafana-graphite/).
+Official graphite plugin for dokku. Currently defaults to installing [dokku/docker-grafana-graphite 13.2.8](https://hub.docker.com/r/dokku/docker-grafana-graphite/).
 
 ## Requirements
 
@@ -95,7 +95,7 @@ dokku graphite:create lollipop
 You can also specify the image and image version to use for the service. It *must* be compatible with the dokku/docker-grafana-graphite image.
 
 ```shell
-dokku graphite:create lollipop --image "dokku/docker-grafana-graphite" --image-version "13.2.6"
+dokku graphite:create lollipop --image "dokku/docker-grafana-graphite" --image-version "13.2.8"
 ```
 
 An image other than dokku/docker-grafana-graphite has no version to fall back on, because the version this plugin pins belongs to dokku/docker-grafana-graphite, so name one alongside it.
@@ -497,7 +497,7 @@ dokku graphite:set <service> <key> [<value>] [--id <id>]
 flags:
 
 - `--allow-restart`: restart or reexpose the service when the property only takes effect that way and its value changed
-- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding PLUGIN_AMBASSADOR_IMAGE and the ambassador-image global property
+- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding the ambassador-image global property
 - `--global`: set the property for every service of the datastore, taking <datastore-type> <key> [<value>] with no service name
 - `--id <string>`: record the property on this backup schedule instead of on the service
 - `--no-restart`: do not restart the linked apps when a password change updates the url they hold
@@ -829,7 +829,7 @@ dokku graphite:expose <service> <ports...>
 
 flags:
 
-- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding PLUGIN_AMBASSADOR_IMAGE and the ambassador-image global property
+- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding the ambassador-image global property
 - `-f|--force`: stop and start a running service without asking when its container has to publish other ports
 
 Expose the service on the service's normal ports, allowing access to it from the public interface (`0.0.0.0`):
@@ -903,7 +903,7 @@ dokku graphite:reexpose <service>
 
 flags:
 
-- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding PLUGIN_AMBASSADOR_IMAGE and the ambassador-image global property
+- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding the ambassador-image global property
 - `-f|--force`: stop and start a running service without asking when its container has to publish other ports
 
 Apply a changed port-bind-address or port-source-range to an exposed service, on the ports it is already exposed on:
@@ -920,7 +920,7 @@ dokku graphite:set lollipop expose-mode direct
 dokku graphite:reexpose lollipop --force
 ```
 
-Replace the ambassador with one made from another image. --ambassador-image wins over `PLUGIN_AMBASSADOR_IMAGE,` which wins over the ambassador-image global property:
+Replace the ambassador with one made from another image, for this command with --ambassador-image or for every service with the ambassador-image global property. The flag wins over the global property:
 
 ```shell
 dokku graphite:reexpose lollipop --ambassador-image dokku/ambassador:0.8.4
@@ -969,7 +969,7 @@ dokku graphite:start <service>
 
 flags:
 
-- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding PLUGIN_AMBASSADOR_IMAGE and the ambassador-image global property
+- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding the ambassador-image global property
 
 Start the service:
 
@@ -1014,7 +1014,7 @@ dokku graphite:restart <service>
 
 flags:
 
-- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding PLUGIN_AMBASSADOR_IMAGE and the ambassador-image global property
+- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding the ambassador-image global property
 
 Restart the service:
 
@@ -1031,10 +1031,11 @@ dokku graphite:upgrade <service> [--upgrade-flags...]
 
 flags:
 
-- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding PLUGIN_AMBASSADOR_IMAGE and the ambassador-image global property
+- `--ambassador-image <string>`: the image to make the ambassador from, with a tag or digest, overriding the ambassador-image global property
 - `-c|--config-options <string>`: extra arguments for the process the service container runs, not docker flags; use mount for mounts
 - `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
 - `--definition <string>`: the definition to move the service onto, instead of the one its image and version resolve to
+- `-f|--force`: export and import the data without asking when the upgrade cannot migrate it in place, and fall back to that when an in-place migration fails
 - `-i|--image <string>`: the image to upgrade the service to
 - `-I|--image-version <string>`: the image version to upgrade the service to
 - `-N|--initial-network <string>`: the initial network to attach the service to
@@ -1243,7 +1244,7 @@ A `port-source-range` cannot be enforced on a port the service container publish
 
 ### Choosing the ambassador image
 
-The ambassador is made from `dokku/ambassador:0.8.4` unless another image is named. Pass `--ambassador-image` to `expose`, `reexpose`, `start`, `restart`, `upgrade` or `set` to name one for that command, set the `PLUGIN_AMBASSADOR_IMAGE` environment variable, or set the `ambassador-image` global property with `dokku graphite:set --global ambassador-image dokku/ambassador:0.8.4`. The flag is used first, then the environment variable, then the global property. The environment variable only reaches the plugin where sudo keeps the caller's environment, which it does not on newer versions of ubuntu.
+The ambassador is made from `dokku/ambassador:0.8.4` unless another image is named. Pass `--ambassador-image` to `expose`, `reexpose`, `start`, `restart`, `upgrade` or `set` to name one for that command, or set the `ambassador-image` global property with `dokku graphite:set --global ambassador-image dokku/ambassador:0.8.4` to name one for every service. The flag wins over the global property.
 
 The image has to name a tag or a digest. A different image reaches an exposed service on its next start, restart, upgrade or `dokku graphite:reexpose`, which replace an ambassador made from another image. `dokku/ambassador:0.8.4` or newer is needed for a udp port.
 
